@@ -8,6 +8,7 @@ This project is an application which monitors a public transport system and dyna
 This project was created for the course "Net Computing" at the University of Groningen.
 
 ## Setup
+
 ###Node Servers : To start server after cloning
 cd dynamicBusNodeServer
 sudo npm install
