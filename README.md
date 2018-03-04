@@ -22,7 +22,9 @@ Describe and show how to run the tests with code examples here.
 
 ## Contributors
 Ashton Spina
+
 Alexandru Babeanu
+
 Alexander Daffurn-Lewis
 
 ## License
