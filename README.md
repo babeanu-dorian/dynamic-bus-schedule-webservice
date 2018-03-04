@@ -9,7 +9,7 @@ This project was created for the course "Net Computing" at the University of Gro
 
 ## Setup
 
-###Node Servers : To start server after cloning
+### Node Servers : To start server after cloning
 cd dynamicBusNodeServer
 sudo npm install
 npm start
