@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Dynamic Bus Scheduler</string>
+
+    <string-array name="spinner_options_array">
+        <item>Bus Route</item>
+        <item>Bus Stop</item>
+    </string-array>
+</resources>
