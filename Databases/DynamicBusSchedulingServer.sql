@@ -24,8 +24,8 @@ CREATE TABLE Buses(
 CREATE TABLE StationsOnRoute(
 	Station INT UNSIGNED NOT NULL,
 	Route INT UNSIGNED NOT NULL,
-	Location FLOAT(4, 4) UNSIGNED NOT NULL,    -- dist(routeStart, stationLocation)/ routeLength
-	CurrentDelay INT NOT NULL,                  -- negative values are allowed to represent when the bus is ahead of the schedule
+	Location FLOAT(4, 4) UNSIGNED NOT NULL,    -- dist(routeStart, stationLocation) / routeLength
+	CurrentDelay INT NOT NULL,                 -- in seconds; negative values are allowed to represent when the bus is ahead of the schedule
 	CONSTRAINT PK_StationsOnRoute PRIMARY KEY (Station, Route),
 	FOREIGN KEY (Station) REFERENCES Stations(Id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (Route) REFERENCES Routes(Id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -36,7 +36,7 @@ CREATE TABLE ExpectedTimes(
 	Route INT UNSIGNED NOT NULL,
 	Hour TINYINT UNSIGNED NOT NULL,            -- 1st hour of the time interval
 	Month TINYINT UNSIGNED NOT NULL,
-	Duration INT NOT NULL,                     -- time to reach station from previous station
+	Duration INT NOT NULL,                     -- time (seconds) to reach station from previous station
 	CONSTRAINT PK_StationsOnRoute PRIMARY KEY (Station, Route, Hour, Month),
 	FOREIGN KEY (Station) REFERENCES Stations(Id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (Route) REFERENCES Routes(Id) ON DELETE CASCADE ON UPDATE CASCADE
