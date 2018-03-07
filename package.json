@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./dynamicBusNodeServer/bin/www",
+    "test": "vows test/test.js --spec"
   },
   "dependencies": {
     "body-parser": "~1.18.2",
@@ -12,5 +13,10 @@
     "express": "^4.15.5",
     "morgan": "~1.9.0",
     "serve-favicon": "~2.4.5"
+  },
+  "devDependencies": {
+    "mocha": "^5.0.2",
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1"
   }
 }
