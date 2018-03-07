@@ -24,7 +24,7 @@ CREATE TABLE Buses(
 CREATE TABLE StationsOnRoute(
 	Station INT UNSIGNED NOT NULL,
 	Route INT UNSIGNED NOT NULL,
-	Location FLOAT(4, 4) UNSIGNED NOT NULL,    -- routeLength / dist(routeStart, stationLocation)
+	Location FLOAT(4, 4) UNSIGNED NOT NULL,    -- dist(routeStart, stationLocation)/ routeLength
 	CurrentDelay INT NOT NULL,                  -- negative values are allowed to represent when the bus is ahead of the schedule
 	CONSTRAINT PK_StationsOnRoute PRIMARY KEY (Station, Route),
 	FOREIGN KEY (Station) REFERENCES Stations(Id) ON DELETE CASCADE ON UPDATE CASCADE,
