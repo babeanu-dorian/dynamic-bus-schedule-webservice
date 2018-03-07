@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/babeanu-dorian/dynamic-bus-schedule-webservice.svg?branch=master)](https://travis-ci.org/babeanu-dorian/dynamic-bus-schedule-webservice)
+
 # Dynamic Bus Schedule Webservice
 
 ## Synopsis
