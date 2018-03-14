@@ -17,7 +17,7 @@ module.exports = function(id, route, key, serverList, speed) {
 				this.progress -= 1.0;
 			request.post(
 				{
-					url:this.routeServer + "/busData",
+					url:this.routeServer + "/routeData",
 					body:JSON.stringify({
 						id:this.id,
 						key:this.key,
