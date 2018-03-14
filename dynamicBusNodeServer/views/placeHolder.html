@@ -38,22 +38,30 @@
 				<h1 class="elegantshd"> Dynamic Bus Scheduler </h1>
 			</div>
 			<div class="row">
-				<div class = "col-xs-12 col-sm-6 col-lg-6">
-					<div class="form-group">
-				        <label for="sel1">Select Search Type : </label>
-				        <select class="form-control" id="sel1">
-					        <option>Route</option>
-					        <option>Station</option>
-				        </select>
-	                </div>
-			    </div> 
-			    <div class = "col-xs-12 col-sm-6 col-lg-6">
-				    <div class="form-group">
-					    <label for="number">Number : </label>
-					    <input type="text" class="form-control" id="number">
+
+
+				<form method="post">
+					<div class="form-row align-items-center">
+						<div class="col-auto my-1">
+							<select class="custom-select mr-sm-2" name="routeSelect">
+						        <option selected>Choose...</option>
+						        <option value="0">Route</option>
+						        <option value="1">Station</option>
+					        </select>
+					    </div>
+				        <div class="col-auto my-1">
+						    <input type="text" placeholder="Number" name="user">
+						</div>
+						<div class="col-auto my-1">
+						    <input type="submit" value="Submit">
+						</div>
 					</div>
-				</div>
+				</form>
+
+
+
 			</div>
+
 			<div class="row">
 	            <table class="table table-dark">
 	                <thead>

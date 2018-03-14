@@ -1,0 +1,37 @@
+Communication protocol via JSON files:
+
+Bus data sent via POST:
+req = {
+	body:{
+		id:<id of the bus, must be in database>,
+		key:<authentication key, must be checked to correspond with the one in the database>,
+		route:<id of the route assigned to the bus, check if the server handles it>,
+		progress:<floating point number, where the bus is on the route>
+	}
+}
+Server reply to bus data:
+res = {
+	body:{
+		route:<id of the route assigned to the bus, might be redundant>,
+		serverOfRoute:<the address of the server handling that route, the bus will update its routeServer if this is
+						different than the one used to send the data and send the data to the new address>
+	}
+}
+
+App requests route data via GET:
+req = {
+	body:{
+		route:<id of the route>,
+		station:<id of the station, the server should provide data for the whole route if undefined>,
+		time:<the start of the time period the user is interested in, treated as "now" if undefined>
+	}
+}
+Server reply to app data request:
+res = {
+	body:{
+		route:<id of the requested route, might be redundant>,
+		serverOfRoute:<the address of the server handling that route, the app will update its route to server map
+						if this is different than the one used to send the request, and send the request to the new address, schedule is undefined in that case>
+		schedule:[<array of objects of type {station, seconds to arrival}>]
+	}
+}
