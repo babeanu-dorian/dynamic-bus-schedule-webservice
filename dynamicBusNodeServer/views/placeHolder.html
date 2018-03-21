@@ -45,16 +45,16 @@
 						<div class="col-auto my-1">
 							<select class="custom-select mr-sm-2" name="routeSelect" ng-model="selectedRoute" ng-options="x for x in routes">
 								<option selected value>all</option>
-					        </select>
-					    </div>
-				        <div class="col-auto my-1">
+					    </select>
+					  </div>
+				    <div class="col-auto my-1">
 							<select class="custom-select mr-sm-2" name="stationSelect" ng-model="selectedStation" ng-options="x.name for x in stationRoutes">
 								<option selected value>all</option>
-					        </select>
-					    </div>
+					    </select>
+					  </div>
 					    <!-- TODO: add a time input (html defaults are bad, look at bootstrap ones) -->
-					    <div class="col-auto my-1">
-						    <button ng-click="getRouteData()">Submit</button>
+					  <div class="col-auto my-1">
+						  <button ng-click="getRouteData()">Submit</button>
 						</div>
 					</div>
 				</form>
