@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/babeanu-dorian/dynamic-bus-schedule-webservice.svg?branch=master)](https://travis-ci.org/babeanu-dorian/dynamic-bus-schedule-webservice)
+
 # Dynamic Bus Schedule Webservice
 
 ## Synopsis
@@ -10,11 +12,26 @@ This project was created for the course "Net Computing" at the University of Gro
 ## Setup
 
 ### Node Servers : To start server after cloning
-cd dynamicBusNodeServer
-
 sudo npm install
 
 npm start
+
+### Database: To set up a database on a new machine
+
+./Databases/makeDB.sh
+and provide: 
+
+     1. the name of the database (ex: DynamicBusSchedulingServer)
+
+     2. the username used by the application
+
+     3. the password used by the application
+
+     4. the root password for the local MySQL Server
+
+Alternatively, when using a script:
+
+echo -e "<1>\n<2>\n<3>\n<4>\n" | ./Databases/makeDB.sh
 
 ### App
 Not created yet

@@ -1,46 +1,219 @@
-<br />
-<h1>Bus Timetable</h1>
-<div class="cd-schedule loading">
-	<div class="timeline">
-		<ul>
-			<li><span>09:00</span></li>
-			<li><span>09:30</span></li>
-			<li><span>10:00</span></li>
-			<li><span>10:30</span></li>
-			<li><span>11:00</span></li>
-			<li><span>11:30</span></li>
-			<li><span>12:00</span></li>
-			<li><span>12:30</span></li>
-			<li><span>13:00</span></li>
-			<li><span>13:30</span></li>
-			<li><span>14:00</span></li>
-			<li><span>14:30</span></li>
-			<li><span>15:00</span></li>
-			<li><span>15:30</span></li>
-			<li><span>16:00</span></li>
-			<li><span>16:30</span></li>
-			<li><span>17:00</span></li>
-			<li><span>17:30</span></li>
-			<li><span>18:00</span></li>
-		</ul>
-	</div> <!-- .timeline -->
-	<div class="event-modal">
-		<header class="header">
-			<div class="content">
-				<span class="event-date"></span>
-				<h3 class="event-name"></h3>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	</head>
+	<style>
+        /* override Bootstrap's container */
+        .container-fluid {
+            padding-right:5;
+            padding-left:5;
+            margin-right:auto;
+            margin-left:auto
+        }
+        body {
+		    background-color: #72BF61;
+		} 
+		h1 {
+		  font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+		  font-size: 72px;
+		  padding: 20px 30px;
+		  text-align: center;
+		  text-transform: uppercase;
+		  text-rendering: optimizeLegibility;
+		}
+		.elegantshd {
+		  color: #131313;
+		  letter-spacing: .10em;
+		  text-shadow: 1px -1px 0 #72BF61;
+		}
+
+    </style>
+    <div class="p-3 mb-2 bg-dark text-white" ng-app="scheduleApp" ng-controller="scheduleController">
+		<div class="container-fluid">
+			<div class="row">
+				<h1 class="elegantshd"> Dynamic Bus Scheduler </h1>
 			</div>
+			<div class="row">
 
-			<div class="header-bg"></div>
-		</header>
 
-		<div class="body">
-			<div class="event-info"></div>
-			<div class="body-bg"></div>
+				<form novalidate>
+					<div class="form-row align-items-center">
+						<div class="col-auto my-1">
+							<select class="custom-select mr-sm-2" name="routeSelect" ng-model="selectedRoute" ng-options="x for x in routes">
+								<option selected value>all</option>
+					    </select>
+					  </div>
+				    <div class="col-auto my-1">
+							<select class="custom-select mr-sm-2" name="stationSelect" ng-model="selectedStation" ng-options="x.name for x in stationRoutes">
+								<option selected value>all</option>
+					    </select>
+					  </div>
+					    <!-- TODO: add a time input (html defaults are bad, look at bootstrap ones) -->
+					  <div class="col-auto my-1">
+						  <button ng-click="getRouteData()">Submit</button>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="row">
+	            <table class="table table-dark">
+	                <thead>
+	                    <tr>
+	                        <th>Bus Number</th>
+	                        <th>Estimated Arrival</th>
+	                        <th>Station</th>
+	                        <th>Status</th>                                          
+	                    </tr>
+	                </thead>
+	                <tbody>
+		                <tr ng-repeat="x in schedule">
+		                    <td>{{x.route}}</td>
+		                    <td>{{x.station}}</td>
+		                    <td>{{x.arrivalTime}}</td>
+		                    <td><span class="label label-success">{{x.status}}</span>
+		                    </td>                                       
+		                </tr>                            
+	                </tbody>
+	            </table>
+			</div>
 		</div>
-
-		<a href="#0" class="close">Close</a>
 	</div>
+	<script>
+		var serverList = [window.location.href];
 
-	<div class="cover-layer"></div>
-</div> <!-- .cd-schedule -->
+		var mapRouteServer = { //placeholder values, set to empty once the server can handle GET /appData
+			r0:serverList[0],
+			r1:serverList[0],
+			r2:serverList[0],
+			r3:serverList[0]
+		};
+
+		var workingServer = 0;      // index of the serverList element to be used,
+		                            // increment on connection failure
+
+		var allServersMightBeDown = false;  // set to true when workingServer exided serverList.length and
+											// has to restart from 0; if already true, the servers are assumed
+											// to be down; reset to false upon successfully reaching a server
+
+		function handleError(err, callback) {
+			// TODO check if the error is a connection failure before running the code below
+			++workingServer;
+			if (workingServer === serverList.length) {
+				workingServer = 0;
+				if (allServersMightBeDown)
+					window.location.reload(0); // all servers are down, try to reload
+				else
+					allServersMightBeDown = true;
+			}
+			if (callback)
+				callback();
+		}
+
+		function handleSuccess() {
+			allServersMightBeDown = false;
+		}
+
+		function pushUnique(arr, val) {
+			if (arr.indexOf(val) === -1)
+				arr.push(val);
+		}
+
+		// selects the server corresponding to the route and passes its address to the callback function
+		function selectSever(route, callback) {
+			var url;
+			if (mapRouteServer['r' + route])
+				url = mapRouteServer['r' + route];
+			else
+				url = serverList[workingServer % serverList.length];
+			callback(url);
+		}
+
+		function makeRouteDataRequest($http, $scope, data) {
+			selectServer(data.route, function(url) {
+				$http.post(url, JSON.stringify(data)).then(
+					function(response) {		// success
+						if (response.body.serverOfRoute !== url) {
+							// the server is not the one handling that route,
+							// update server map and list and make the request to the new address
+							mapRouteServer['r' + data.route] = response.body.serverOfRoute;
+							pushUnique(serverList, response.body.serverOfRoute);
+							makeRouteDataRequest($http, $scope, data);
+						} else {
+							$scope.schedule = response.body.schedule;
+						}
+			    	},
+			    	function(response) {		// error, TODO
+						handleError(response, makeRouteDataRequest.bind(null, $http, $scope, data));
+			    	}
+				);
+			});
+		}
+
+		function makeAppDataRequest($http, $scope) {
+			$http.get(serverList[workingServer]).then(
+		    	function(response) {		// success
+					mapRouteServer = response.body.mapRouteServer;
+					$scope.stationRoutes = response.body.stationRoutes;
+					for (var x in mapRouteServer) {
+						$scope.routes.push(parseInt(x.substring(1)));
+						pushUnique(serverList, mapRouteServer[x]);
+					}
+		    	},
+		    	function(response) {		// error, TODO
+					handleError(response, makeAppDataRequest.bind(null, $http, $scope));
+		    	}
+		    );
+		}
+
+		var app = angular.module('scheduleApp', []);
+		app.controller('scheduleController', function($scope, $http) {
+			// placeholder values, delete once the server can handle GET /appData
+			$scope.stationRoutes = [
+				{
+					id:0,
+					name:'Hoofdstation Groningen',
+					routes:[0, 1, 2, 3]
+				},
+				{
+					id:1,
+					name:'Zernike Campus',
+					routes:[0, 1, 2, 3]
+				},
+			];
+		    $scope.routes = [0, 1, 2, 3];
+		    //---------------------------------------------------------------------
+
+		    $scope.getRouteData = function(){
+		    	$scope.schedule = [];
+		    	var requestData = { 'time':$scope.selectedTime };
+		    	if ($scope.selectedStation) {
+		    		requestData.station = $scope.selectedStation.id;
+		    	}
+		    	if ($scope.selectedRoute) {
+		    		requestData.route = $scope.selectedRoute;
+		    		makeRouteDataRequest($scope, $http, requestData);
+		    	} else if ($scope.selectedStation) {
+		    		// if the route is not specified, make a request for each route containing the station
+		    		for (var i = 0; i != $scope.selectedStation.routes.length; ++i) {
+		    			requestData.route = $scope.selectedStation.routes[i];
+		    			makeRouteDataRequest($scope, $http, requestData);
+		    		}
+		    	} else {
+		    		// TODO, display this in a friendlier way:
+		    		window.alert('Select at least one route or one station');
+		    	}
+		    }
+
+		    // uncomment this when the server can handle it
+		    /*
+		    $scope.stationRoutes = [];
+		    $scope.routes = [];
+		    makeAppDataRequest($http, $scope);
+		    */
+		});
+	</script>
+</html>
