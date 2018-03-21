@@ -1,6 +1,6 @@
 Communication protocol via JSON files:
 
-Bus data sent via POST:
+Bus data sent via POST /busData:
 req = {
 	body:{
 		id:<id of the bus, must be in database>,
@@ -18,20 +18,42 @@ res = {
 	}
 }
 
-App requests route data via GET:
-req = {
+
+App requests general data about routes and stations via GET /appData:
+req = {}
+Server reply:
+res = {
 	body:{
+		mapRouteServer:{
+			r0:<address of server handling route with index 0>,
+			r1:<address of server handling route with index 1>,
+			...<for all routes>
+		},
+		stationRoutes:[
+			{
+				id:<station id>,
+				name:<station name>,
+				routes:<array of route id's for the routes cotaining this station>
+			},
+			...<for all stations>
+		]
+	}
+}
+
+
+App requests route data via POST /routeData:
+req = {
+	data:{
 		route:<id of the route>,
-		station:<id of the station, the server should provide data for the whole route if undefined>,
+		station:<id of the station, the server should provide data for the whole route if null or undefined>,
 		time:<the start of the time period the user is interested in, treated as "now" if undefined>
 	}
 }
-Server reply to app data request:
+Server reply to app's route data request:
 res = {
 	body:{
-		route:<id of the requested route, might be redundant>,
 		serverOfRoute:<the address of the server handling that route, the app will update its route to server map
 						if this is different than the one used to send the request, and send the request to the new address, schedule is undefined in that case>
-		schedule:[<array of objects of type {station, seconds to arrival}>]
+		schedule:[<array of objects of type {route, station, seconds to arrival}>]
 	}
 }

@@ -26,8 +26,9 @@ module.exports = function(id, route, key, serverList, speed) {
 					})
 				},
 				function(error, response, body){
-					console.log(error); // TODO: select another server from serverList in case of error
-					if (body.serverOfRoute !== this.routeServer) {
+					if (error) {
+						console.log(error); // TODO: select another server from serverList in case of error
+					} else if (body.serverOfRoute !== this.routeServer) {
 						// the server was not the one handling route,
 						// update server address and send the data there
 						this.routeServer = body.serverOfRoute;

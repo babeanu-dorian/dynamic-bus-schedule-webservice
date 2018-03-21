@@ -1,14 +1,15 @@
 var request = require('request');
 
-module.exports = function(serverList) {
+module.exports = function(url) {
 
 	return {
-		serverList:serverList,
+		serverList:[url],
 		mapRouteServer:{},
-		serverIdx:0, // increment in case of error
+		workingServer: 0,
+		allServersMightBeDown:false,
 		getRouteData: function(routeId, stationId, time, callback) {
 			if (!this.mapRouteServer["r" + routeId])
-				this.mapRouteServer["r" + routeId] = serverList[this.serverIdx];
+				this.mapRouteServer["r" + routeId] = serverList[this.workingServer];
 			request.get(
 				{
 					url:this.mapRouteServer["r" + routeId] + "/schedule",
@@ -19,8 +20,9 @@ module.exports = function(serverList) {
 					})
 				},
 				function(error, response, body){
-					console.log(error); // TODO: select another server from serverList in case of error
-					if (body.serverOfRoute !== this.mapRouteServer["r" + routeId]) {
+					if (error) {
+						console.log(error); // TODO: select another server from serverList in case of error
+					} else if (body.serverOfRoute !== this.mapRouteServer["r" + routeId]) {
 						// the server was not the one handling route,
 						// update server address and get the schedule from there
 						this.mapRouteServer["r" + routeId] = body.serverOfRoute;
