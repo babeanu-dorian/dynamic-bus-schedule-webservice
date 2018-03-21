@@ -9,6 +9,10 @@ router.get('/', function(req, res, next) {
     just use it to render the html file with .sendFile.  Trying
     to hack out of a view engine seems to break Express so its better
     to just comply and use ejs*/
+    var route = req.query.route;
+    if(route) {
+    	console.log(route);
+    }
     res.sendFile(path.join(__dirname, '../views', 'placeHolder.html'));
 });
 

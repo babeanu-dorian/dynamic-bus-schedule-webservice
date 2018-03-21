@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./dynamicBusNodeServer/bin/www",
-    "test": "vows test/test.js --spec"
+    "test": "mocha --timeout 10000"
   },
   "dependencies": {
     "body-parser": "~1.18.2",
