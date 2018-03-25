@@ -1,63 +1,53 @@
-var express = require('express');
-var path = require('path');
-var router = express.Router();
-var mysql = require('mysql');
+var router = require('express').Router();
 
-//TODO :: use real values here
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "yourusername",
-    password: "yourpassword",
-    database: "mydb"
-});
+var serverData = require('../serverData');
 
-/* GET data. */
-router.get('/', function(req, res, next) {
-	console.log(req.body);
-	//TODO:: MAKE TEST THIS WITH ACTUAL DB CONNECTION to ensure functionality
-    con.connect(function(err) {
-        if (err) throw err;
-        if(!req.body.routeSelect){ // wants info on a route
-            con.query("SELECT " + req.body.num + " FROM Routes", function (err, result, fields) {
-                if (err) throw err;
-                    res.json(result);//TODO :: Make this get all the data we actually need, not just the route, but template is there
-                });
-            }
-        else{
-            con.query("SELECT " + req.body.num + " FROM StationsOnRoute", function (err, result, fields) {
-                if (err) throw err;
-                    res.json(result)//TODO :: Make this get all the data we actually need, not just the route, but template is there
-                });
-            }
-        }
-    });
-});
-
-/* POST data */
+// POST data
 router.post('/', function(req, res, next) {
-	//TODO :: Store data in DB
-	console.log(req.body);
+	// TODO: handle the time as well
+	let route = req.body.route;
+	let station = req.body.station;
+	let time = req.body.time;
 
-    con.connect(function(err) {
-        if (err) throw err;
-        con.query("SELECT " + req.body.id + " FROM Buses", function (err, result, fields) {
-            if (err) throw err;
-                if(result.AuthenticationKey == req.body.key){
-                    if(result.route == req.body.route){
-                        var sql = "INSERT INTO RecordedTimes (Bus, Route, Progress) VALUES (" 
-                                + req.body.id + "," + req.body.route + "," + req.body.progress + ")";
-                        con.query(sql, function (err, result) {
-                            if (err) throw err;
-                            console.log("1 record inserted");
-                        });
-                    }
-                    else {
-                        //TODO :: Return server which handles route
-                    }
-                }
-            });
-        }
-        res.json(data);//TODO :: return data to bus based on protocol
+	// TODO: make a function that does this check, the condition of this 'if' is ridiculous
+	// test for bad requests; TODO: check for time once the type is decided
+	if (
+		!Number.isInteger(route) || route < 0 ||
+		(typeof station !== 'undefined' && station !== null &&
+		(!Number.isInteger(station) || station < 0 ||
+		typeof serverData.routeStations.stations['s' + station] === 'undefined')) //|| (typeof time !== 'undefined' && ...)
+	) {
+		res.status(400);
+		res.send();
+	} else {
+		let response = {
+			serverOfRoute:serverData.mapRouteServer['r' + route],
+			schedule:[]
+		};
+		if (response.serverOfRoute === serverData.address) {
+			if (typeof station === 'undefined' || station === null) {
+				for (let station in serverData.routeStations['r' + route].stations) {
+					for (let bus in serverData.routeStations['r' + route].stations[station].buses) {
+						response.schedule.push({
+							route:route,
+							station:parseInt(station.substring(1)),
+							arrivalTime:serverData.routeStations['r' + route].stations[station].buses[bus].arrivalTime
+						});
+					}
+				}
+			} else {
+				for (let bus in serverData.routeStations['r' + route].stations['s' + station].buses) {
+					response.schedule.push({
+						route:route,
+						station:station,
+						arrivalTime:serverData.routeStations['r' + route].stations['s' + station].buses[bus].arrivalTime
+					});
+				}
+			}
+		}
+
+		res.json(response);
+	}
 });
 
 module.exports = router;
