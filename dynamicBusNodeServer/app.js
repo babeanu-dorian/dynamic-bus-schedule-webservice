@@ -4,10 +4,13 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var net = require('net');
 
 var index = require('./routes/index');
 
 var app = express();
+
+var port = normalizePort(process.env.PORT || '3000');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,6 +24,15 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
+
+//create socket on port 4000
+var server = net.createServer(function(socket) {
+	socket.write('Server has been Pinged\r\n');
+	socket.pipe(socket);
+});
+server.listen(port+1000, '127.0.0.1');
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
