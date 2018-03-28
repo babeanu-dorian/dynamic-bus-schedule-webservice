@@ -93,6 +93,13 @@ function init_mapRouteServer(serverData) {
 	});
 }
 
+function union_arrays (obj1, obj2) {
+  	var result = {};
+	for(var key in obj1) result[key] = obj1[key];
+	for(var key in obj2) result[key] = obj2[key];
+  	return resuilt;
+}
+
 module.exports = {
 	// TODO: use setInterval to schedule these actions:
 	// - update station delay from individual bus delays
@@ -157,5 +164,14 @@ module.exports = {
 			}
 			prevStationTime = arrivalTime;
 		}
+	},
+	/**
+		Takes the serverData and an array of data and unions it into
+		the serverData's mapRouteServer array.
+	**/
+	unionMapRouteServer:function(currentData, newData) {
+		//this.mapRouteServer = union_arrays(this.mapRouteServer, newData);
+		//console.log(currentData);
+		//console.log(newData);
 	}
 }
