@@ -1,5 +1,4 @@
 var router = require('express').Router();
-
 var serverData = require('../serverData');
 
 // POST data
@@ -45,9 +44,7 @@ router.post('/', function(req, res, next) {
 				}
 			}
 		}
-
 		res.json(response);
 	}
 });
-
 module.exports = router;

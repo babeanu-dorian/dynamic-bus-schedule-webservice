@@ -17,6 +17,12 @@ res = {
 						different than the one used to send the data and send the data to the new address>
 	}
 }
+Server reply to bad data:
+res = {
+	body:{
+		message:"Bad Request"
+	}
+}
 
 
 App requests general data about routes and stations via GET /appData:
