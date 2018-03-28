@@ -4,17 +4,18 @@
  * Module dependencies.
  */
 
-
 var app = require('../app');
 var serverData = require('../serverData');
 var debug = require('debug')('dynamicbus:server');
-var http = require('http');
-
+var server = require('http').Server(app);
+var net = require('net');
+	JsonSocket = require('json-socket');
+//var io = require("socket.io")(server);
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizeValue(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
@@ -24,8 +25,6 @@ app.set('port', port);
 // establish database connection and store static data in memory
 serverData.init(port);
 
-var server = http.createServer(app);
-
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -34,11 +33,60 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+
+var netServer = net.createServer(function(socket) {
+	console.log('Client Connected');
+	socket = new JsonSocket(socket); //decorate net.Socket as JSONSocket
+
+	socket.on('end', function() {
+    	console.log('Client Disconnected');
+  	});
+
+  	socket.on('message', function (data) {
+    	console.log('Received: ' + data.message);
+    	console.log('Address: ' + data.host);
+    	console.log('Port: ' + data.port);
+    	socket.sendMessage({message : 'Data Sent', 
+    						host: netServer.address().address, 
+    						port: netServer.address().port, 
+    						payload: serverData.mapRouteServer});
+  	});
+});
+netServer.listen((port + 1000), '127.0.0.1');
+/*
+io.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
+});*/
+
+if(process.env.SPAWN) {
+	var client = new JsonSocket(new net.Socket());
+	client.connect(process.env.SPAWN, '127.0.0.1', function() {
+    	console.log('Connected\n');
+    	client.sendMessage({message : 'Requesting send ServerMap', 
+				    		host: netServer.address().address, port: 
+				    		netServer.address().port, 
+				    		payload: 'myInfo'});
+	});
+    client.on('message', function(data) {
+    	console.log('Received: ' + data.message);
+    	console.log('Address: ' + data.host);
+    	console.log('Port: ' + data.port);
+    	console.log(data.payload);
+	});
+
+	client.on('close', function() {
+    	console.log('Connection closed');
+	});
+}
+
 /**
  * Normalize a port into a number, string, or false.
  */
 
-function normalizePort(val) {
+function normalizeValue(val) {
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
