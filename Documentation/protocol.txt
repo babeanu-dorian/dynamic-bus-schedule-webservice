@@ -49,7 +49,7 @@ res = {
 
 App requests route data via POST /routeData:
 req = {
-	data:{
+	body:{
 		route:<id of the route>,
 		station:<id of the station, the server should provide data for the whole route if null or undefined>,
 		time:<the start of the time period the user is interested in, treated as "now" if undefined>

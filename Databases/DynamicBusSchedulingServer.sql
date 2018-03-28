@@ -4,6 +4,7 @@ use DynamicBusSchedulingServer;
 
 CREATE TABLE Stations(
 	Id INT UNSIGNED NOT NULL,
+	Name VARCHAR(255) NOT NULL,
 	AuthenticationKey CHAR(16) NOT NULL,      -- used to authenticate the timetable devices
 	PRIMARY KEY (Id)
 );
