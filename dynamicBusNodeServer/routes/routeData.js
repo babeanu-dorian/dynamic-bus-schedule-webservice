@@ -26,10 +26,9 @@ router.get('/', function(req, res, next) {
         else{
             con.query("SELECT " + req.body.num + " FROM StationsOnRoute", function (err, result, fields) {
                 if (err) throw err;
-                    res.json(result)//TODO :: Make this get all the data we actually need, not just the route, but template is there
+                    res.json(result);//TODO :: Make this get all the data we actually need, not just the route, but template is there
                 });
             }
-        }
     });
 });
 
@@ -56,8 +55,7 @@ router.post('/', function(req, res, next) {
                     }
                 }
             });
-        }
         res.json(data);//TODO :: return data to bus based on protocol
+    });
 });
-
 module.exports = router;
