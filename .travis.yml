@@ -19,7 +19,7 @@ env:
   -MY_SQL_PASS=test
 
 before_install:
-  - echo "USE mysql;\nUPDATE user SET password=PASSWORD(${MY_SQL_PASS}) WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - echo -e "USE mysql;\nUPDATE user SET password=PASSWORD(${MY_SQL_PASS}) WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - cd Databases
   - echo -e "DynamicBusSchedulingServer\n${MY_SQL_USER}\n${MY_SQL_PASS}\${MY_SQL_PASS}\n" | bash makeDB.sh
   - mysql -u${MY_SQL_USER} -p${MY_SQL_PASS} < ./DB_Mock_Contents/map1.sql
