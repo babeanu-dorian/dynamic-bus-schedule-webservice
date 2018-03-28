@@ -4,7 +4,7 @@ var chai = require('chai');
 var chatHttp = require('chai-http');
 
 var index = require('../dynamicBusNodeServer/routes/index');
-var server = require('../dynamicBusNodeServer/app');
+var server = require('../dynamicBusNodeServer/bin/www');
 var should = chai.should();
 
 chai.use(chatHttp);

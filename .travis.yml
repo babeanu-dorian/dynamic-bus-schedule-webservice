@@ -11,6 +11,20 @@ notifications:
     on_success: never
     on_failure: never
 
+services:
+  - mysql
+
+env:
+  -MY_SQL_USER=test
+  -MY_SQL_PASS=test
+
+deploy:
+  provider: script
+  script: echo -e "DynamicBusSchedulingServer\n${MY_SQL_USER}\n${MY_SQL_PASS}\n\n" | bash ./Databases/makeDB.sh
+
+before_install:
+  -mysql -u${MY_SQL_USER} -p${MY_SQL_PASS} < ./Databases/DB_Mock_Contents/map1.sql
+
 before_script:
   - sleep 5
 
