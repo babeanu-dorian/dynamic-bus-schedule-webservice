@@ -29,11 +29,44 @@ describe('Route Data', () => {
 				res.body.schedule.length.should.be.eql(2);
 				for (var i = 0; i < res.body.schedule.length; i++) {
 					res.body.schedule[i].should.have.property('route');
+					res.body.schedule[i].route.should.be.eql(0);
 					res.body.schedule[i].should.have.property('station');
+					res.body.schedule[i].station.should.be.eql(0);
 					res.body.schedule[i].should.have.property('secondsToArrival');
 				}
 				done();
 			});
 		});
 	});
+	describe('POST a bad route ID', () => {
+	it('Should post a bad route ID and receive a 400', (done) => {
+		let routeData = 	{
+			route: "-1",
+			station: "0"
+		}
+		chai.request(server)
+			.post('/busData')
+			.send(busData)
+			.end((err, res) => {
+				res.should.have.status(400);
+				done();
+			});
+		});
+	});
+	describe('POST a bad station ID', () => {
+	it('Should post a bad station ID and receive a 400', (done) => {
+		let routeData = 	{
+			route: "0",
+			station: "-1"
+		}
+		chai.request(server)
+			.post('/busData')
+			.send(busData)
+			.end((err, res) => {
+				res.should.have.status(400);
+				done();
+			});
+		});
+	});
 });
+

@@ -40,14 +40,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with invalid ID value', () => {
-		it('Should send bus data with invalid ID and receive Bad Request Message', (done) => {
+		it('Should send bus data with invalid ID and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "a",
 				key: "0000000000000000",
@@ -59,14 +57,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with invalid key value', () => {
-		it('Should send bus data with invalid key and receive Bad Request Message', (done) => {
+		it('Should send bus data with invalid key and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "0",
 				key: "1",
@@ -78,14 +74,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with invalid route value', () => {
-		it('Should send bus data with invalid route and receive Bad Request Message', (done) => {
+		it('Should send bus data with invalid route and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "0",
 				key: "0000000000000000",
@@ -97,14 +91,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with invalid progress value', () => {
-		it('Should send bus data with invalid progress value and receive Bad Request Message', (done) => {
+		it('Should send bus data with invalid progress value and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "0",
 				key: "0000000000000000",
@@ -116,14 +108,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with ID not in database', () => {
-		it('Should send bus data with invalid route and receive Bad Request Message', (done) => {
+		it('Should send bus data with invalid route and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "1",
 				key: "0000000000000000",
@@ -135,14 +125,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with key not matching ID', () => {
-		it('Should send bus data with invalid route and receive Bad Request Message', (done) => {
+		it('Should send bus data with invalid route and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "0",
 				key: "0000000000000001",
@@ -154,14 +142,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with key not matching ID not in database', () => {
-		it('Should send bus data with route that doesnt exist and receive Bad Request Message', (done) => {
+		it('Should send bus data with route that doesnt exist and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "0",
 				key: "0000000000000001",
@@ -173,14 +159,12 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
 	});
 	describe('POST bus data with SQL injection', () => {
-		it('Should send bus data with SQL injection and receive Bad Request Message', (done) => {
+		it('Should send bus data with SQL injection and receive Bad Request', (done) => {
 			let busData = 	{
 				id: "0",
 				key: "a || 1 = 1; --hi",
@@ -192,8 +176,6 @@ describe('Bus Data', () => {
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message').eql("Bad Request");
 					done();
 				});
 		});
