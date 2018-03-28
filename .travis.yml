@@ -19,8 +19,9 @@ env:
   -MY_SQL_PASS=test
 
 before_install:
-  - echo -e "DynamicBusSchedulingServer\n${MY_SQL_USER}\n${MY_SQL_PASS}\n\n" | bash ./Databases/makeDB.sh
-  - mysql -u${MY_SQL_USER} -p${MY_SQL_PASS} < ./Databases/DB_Mock_Contents/map1.sql
+  - cd Databases
+  - echo -e "DynamicBusSchedulingServer\n${MY_SQL_USER}\n${MY_SQL_PASS}\n\n" | bash makeDB.sh
+  - mysql -u${MY_SQL_USER} -p${MY_SQL_PASS} < ./DB_Mock_Contents/map1.sql
 
 before_script:
   - sleep 5
