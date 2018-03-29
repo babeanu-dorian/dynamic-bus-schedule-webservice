@@ -4,7 +4,7 @@ var chai = require('chai');
 var chatHttp = require('chai-http');
 
 var index = require('../dynamicBusNodeServer/routes/index');
-var server = require('../dynamicBusNodeServer/app');
+var server = require('../dynamicBusNodeServer/bin/www');
 var should = chai.should();
 
 chai.use(chatHttp);
@@ -19,7 +19,7 @@ describe('Route Data', () => {
 		}
 		chai.request(server)
 			.post('/busData')
-			.send(busData)
+			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.a('object');
@@ -46,7 +46,7 @@ describe('Route Data', () => {
 		}
 		chai.request(server)
 			.post('/busData')
-			.send(busData)
+			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(400);
 				done();
@@ -61,7 +61,7 @@ describe('Route Data', () => {
 		}
 		chai.request(server)
 			.post('/busData')
-			.send(busData)
+			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(400);
 				done();
