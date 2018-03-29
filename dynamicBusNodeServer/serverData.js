@@ -78,34 +78,26 @@ function init_stationRoutes(serverData, sockets) {
 
 function init_mapRouteServer(serverData, sockets) {
 	// setup route to server map
-	// TODO: do this differently once sockets are up and running
-
-	serverData.database.query('SELECT Id AS id FROM Routes', function (error, results, fields) {
-		serverData.mapRouteServer = {};
-		if (error) {
-			console.log(error);
-		}
-		else {
-			for (let i = 0; i != results.length; ++i) {
-				serverData.mapRouteServer['r' + results[i].id] = serverData.address;
+	serverData.mapRouteServer = {};
+	if(!process.env.SPAWN){
+		serverData.database.query('SELECT Id AS id FROM Routes', function (error, results, fields) {	
+			if (error) {
+				console.log(error);
 			}
-		}
-
-		init_stationRoutes(serverData, sockets);
-	});
+			else {
+				for (let i = 0; i != results.length; ++i) {
+					serverData.mapRouteServer['r' + results[i].id] = 'http://' + serverData.address + ':' + port + '/';
+				}
+			}
+		});
+	}
+	init_stationRoutes(serverData, sockets);
 }
 
 function unionObjects (obj1, obj2) {
 	for(var i in obj2) {
-		if(typeof obj1[i] != undefined){
-			obj1[i] = obj2[i];
-		}
-		else{
-			obj1.push(i);
-			obj1[i] = obj2[i];
-		}
+		obj1[i] = obj2[i];
 	}
-	return obj1;
 }
 
 module.exports = {
@@ -132,7 +124,9 @@ module.exports = {
 			database: 'DynamicBusSchedulingServer'
 		});
 
-		this.address = 'http://' + ip.address() + '/' + port + '/';
+		//this.address = 'http://' + ip.address() + ':' + port + '/';
+		this.address = '127.0.0.1';
+		this.port = port;
 
 		init_mapRouteServer(this, sockets);
 	},
@@ -174,7 +168,6 @@ module.exports = {
 		}
 	},
 	updateServerMap:function(serverData, obj2){
-		serverData.mapRouteServer = unionObjects(serverData.mapRouteServer, obj2);
-		console.log(serverData.mapRouteServer);
+		unionObjects(serverData.mapRouteServer, obj2);
 	}
 }
