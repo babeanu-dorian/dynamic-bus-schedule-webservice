@@ -117,7 +117,7 @@ module.exports = {
 			database: 'DynamicBusSchedulingServer'
 		});
 
-		this.address = 'http://' + ip.address() + '/' + port + '/';
+		this.address = 'http://' + ip.address() + ':' + port + '/';
 
 		init_mapRouteServer(this);
 	},
