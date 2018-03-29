@@ -25,7 +25,7 @@ router.post('/', function(req, res, next) {
         res.send();
     } else {
         // check if the bus exists, if it handles the provided route, if the provided key is correct
-        serverData.database.query('SELECT Route AS route, AuthenticationKey AS key FROM Buses WHERE Id = ?', [busId],
+        serverData.database.query('SELECT Route AS route, AuthenticationKey AS \'key\' FROM Buses WHERE Id = ?', [busId],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);
