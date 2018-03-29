@@ -1,6 +1,6 @@
 var ip = require('ip');
 
-function init_routeStations(serverData) {
+function init_routeStations(serverData, sockets) {
 	// TODO: take current month and time of day into account, instead of 0
 	serverData.database.query('SELECT StationsOnRoute.Route AS route, StationsOnRoute.Station AS station, StationsOnRoute.Location AS location, StationsOnRoute.CurrentDelay AS delay, ExpectedTimes.Duration AS duration FROM StationsOnRoute INNER JOIN ExpectedTimes ON StationsOnRoute.Route = ExpectedTimes.Route AND StationsOnRoute.Station = ExpectedTimes.Station AND ExpectedTimes.Hour = 0 AND ExpectedTimes.Month = 0 ORDER BY route, location',
 		function (error, results, fields) {
@@ -32,18 +32,20 @@ function init_routeStations(serverData) {
 			}
 		}
 	);
+	sockets.init(serverData);
 }
 
-function init_appData(serverData) {
+function init_appData(serverData, sockets) {
 	serverData.appData = {
 		mapRouteServer: serverData.mapRouteServer,
 		stationRoutes: serverData.stationRoutes
 	}
+	console.log("ServerMap Initialized");
 
-	init_routeStations(serverData);
+	init_routeStations(serverData, sockets);
 }
 
-function init_stationRoutes(serverData) {
+function init_stationRoutes(serverData, sockets) {
 	serverData.database.query('SELECT Stations.Id AS id, Stations.Name AS name, StationsOnRoute.Route AS route FROM Stations INNER JOIN StationsOnRoute ON Stations.Id = StationsOnRoute.Station ORDER BY id', 
 		function (error, results, fields) {
 			serverData.stationRoutes = [];
@@ -69,12 +71,12 @@ function init_stationRoutes(serverData) {
 				if (typeof station.id !== 'undefined')
 					serverData.stationRoutes.push(station);
 			}
-			init_appData(serverData);
+			init_appData(serverData, sockets);
 		}
 	);
 }
 
-function init_mapRouteServer(serverData) {
+function init_mapRouteServer(serverData, sockets) {
 	// setup route to server map
 	// TODO: do this differently once sockets are up and running
 
@@ -89,15 +91,21 @@ function init_mapRouteServer(serverData) {
 			}
 		}
 
-		init_stationRoutes(serverData);
+		init_stationRoutes(serverData, sockets);
 	});
 }
 
-function union_arrays (obj1, obj2) {
-  	var result = {};
-	for(var key in obj1) result[key] = obj1[key];
-	for(var key in obj2) result[key] = obj2[key];
-  	return resuilt;
+function unionObjects (obj1, obj2) {
+	for(var i in obj2) {
+		if(typeof obj1[i] != undefined){
+			obj1[i] = obj2[i];
+		}
+		else{
+			obj1.push(i);
+			obj1[i] = obj2[i];
+		}
+	}
+	return obj1;
 }
 
 module.exports = {
@@ -106,7 +114,7 @@ module.exports = {
 	//   (keep in mind that the bus delays per station are relative to the station delay)
 	// - update the station delay in the database (table StationsOnRoute)
 	// - update the expected times in the database based on the recorded times (once a day ?)
-	init:function(port) {
+	init:function(port, sockets) {
 		if (!process.env.MY_SQL_USER) {
 			console.log('Environment variable MY_SQL_USER not set, abort');
 			process.exit();
@@ -126,7 +134,7 @@ module.exports = {
 
 		this.address = 'http://' + ip.address() + '/' + port + '/';
 
-		init_mapRouteServer(this);
+		init_mapRouteServer(this, sockets);
 	},
 	setBusArrivalTimes:function(bus, route, progress) {
 		let stationOrder = this.routeStations['r' + route].stationOrder;
@@ -165,13 +173,8 @@ module.exports = {
 			prevStationTime = arrivalTime;
 		}
 	},
-	/**
-		Takes the serverData and an array of data and unions it into
-		the serverData's mapRouteServer array.
-	**/
-	unionMapRouteServer:function(currentData, newData) {
-		//this.mapRouteServer = union_arrays(this.mapRouteServer, newData);
-		//console.log(currentData);
-		//console.log(newData);
+	updateServerMap:function(serverData, obj2){
+		serverData.mapRouteServer = unionObjects(serverData.mapRouteServer, obj2);
+		console.log(serverData.mapRouteServer);
 	}
 }
