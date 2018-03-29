@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./dynamicBusNodeServer/bin/www",
-    "test": "mocha --timeout 10000"
+    "test": "mocha --timeout 10000 --exit"
   },
   "dependencies": {
     "body-parser": "~1.18.2",
