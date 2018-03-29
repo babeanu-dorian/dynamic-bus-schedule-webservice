@@ -19,7 +19,7 @@ describe('Bus Data', () => {
 			progress: "0.0"
 		}
 		chai.request(server)
-			.post('/busData')
+			.post('/busdata')
 			.send(busData)
 			.end((err, res) => {
 				res.should.have.status(200);
@@ -36,7 +36,7 @@ describe('Bus Data', () => {
 				badId: '0'
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -53,7 +53,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -70,7 +70,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -87,7 +87,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -104,7 +104,7 @@ describe('Bus Data', () => {
 				progress: "666.666"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -121,7 +121,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -138,7 +138,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -155,7 +155,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);
@@ -172,7 +172,7 @@ describe('Bus Data', () => {
 				progress: "0.0"
 			}
 			chai.request(server)
-				.post('/busData')
+				.post('/busdata')
 				.send(busData)
 				.end((err, res) => {
 					res.should.have.status(400);

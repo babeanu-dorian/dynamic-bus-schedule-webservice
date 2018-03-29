@@ -18,7 +18,7 @@ describe('Route Data', () => {
 			station: "0"
 		}
 		chai.request(server)
-			.post('/routeData')
+			.post('/routedata')
 			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(200);
@@ -45,7 +45,7 @@ describe('Route Data', () => {
 			station: "0"
 		}
 		chai.request(server)
-			.post('/routeData')
+			.post('/routedata')
 			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(400);
@@ -60,7 +60,7 @@ describe('Route Data', () => {
 			station: "-1"
 		}
 		chai.request(server)
-			.post('/routeData')
+			.post('/routedata')
 			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(400);
