@@ -37,7 +37,10 @@ echo -e "<1>\n<2>\n<3>\n<4>\n" | ./Databases/makeDB.sh
 Not created yet
 
 ### Tests
-Describe and show how to run the tests with code examples here.
+Once database has been setup:
+npm test
+
+The tests ensure all possible http requests that can be made to the server function correctly
 
 ## Contributors
 Ashton Spina
