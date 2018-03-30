@@ -4,8 +4,9 @@ Priginal Server spawns ->
 
 Server added to cluster -> 
 	x - Specify address of server in cluster from which to spawn.
-	x - Create socket to specified server and request server map.
+	x - Create socket to specified server and request appdata, routestations
 	- Take on half of routes from spawn server. (including data for routes).
 	- If not connected to any server in new list create socket connection to it and inform it of new route table.
 	- Adjust socket connections to bus stops.
+	- Send new routeServerMap to all servers
 	- If 'end' received remove from map

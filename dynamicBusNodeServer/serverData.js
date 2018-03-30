@@ -1,4 +1,18 @@
 var ip = require('ip');
+const httpAddress = require('./utility/http_address');
+
+/**
+ * members :
+ *	database
+ *  mapRouteServer
+ *  stationRoutes
+ *  appData
+ *  routeStations
+ *  address
+ *  httpPort
+ *  socketPort
+ *  socketMap
+ */
 
 function init_routeStations(serverData, sockets) {
 	// TODO: take current month and time of day into account, instead of 0
@@ -86,7 +100,7 @@ function init_mapRouteServer(serverData, sockets) {
 			}
 			else {
 				for (let i = 0; i != results.length; ++i) {
-					serverData.mapRouteServer['r' + results[i].id] = 'http://' + serverData.address + ':' + port + '/';
+					serverData.mapRouteServer['r' + results[i].id] = 'http://' + serverData.address + ':' + serverData.httpPort + '/';
 				}
 			}
 		});
@@ -126,7 +140,8 @@ module.exports = {
 
 		//this.address = 'http://' + ip.address() + ':' + port + '/';
 		this.address = '127.0.0.1';
-		this.port = port;
+		this.httpPort = port;
+		this.socketPort = port + 1000;
 
 		init_mapRouteServer(this, sockets);
 	},
@@ -167,7 +182,29 @@ module.exports = {
 			prevStationTime = arrivalTime;
 		}
 	},
-	updateServerMap:function(serverData, obj2){
-		unionObjects(serverData.mapRouteServer, obj2);
+	/**
+	 * Splits the load of routes handled by this server in half
+	 * and assigns them to the address provided in the parameters
+	 */
+	splitLoad:function(address, callback) {
+		let count = 0;
+
+		for(let route in this.mapRouteServer) {
+			if(this.mapRouteServer[route] === httpAddress(this.address, this.httpPort)){
+				++count;
+			}
+		}
+		count /= 2;
+		for(let route in this.mapRouteServer) {
+			if(this.mapRouteServer[route] === httpAddress(this.address, this.httpPort)){
+				this.mapRouteServer[route] = address;
+				console.log(address);
+				--count;
+				if(count == 0) {
+					break;
+				}
+			}
+		}
+		callback();
 	}
 }
