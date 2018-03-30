@@ -9,6 +9,7 @@ function socketProtocol(socket, serverData){
 	socket.on('close', function() {
 		//TODO :: Find socket in socket map and remove it.
         console.log('Connection closed on socket');
+        //TODO :: Redistribute load
 	});
 	socket.on('message', function(data) {
 		if (data.success === false) {
