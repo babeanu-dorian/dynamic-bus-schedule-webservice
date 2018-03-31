@@ -218,5 +218,17 @@ module.exports = {
 		this.mapRouteServer = mapRouteServer;
 		this.appData.mapRouteServer = mapRouteServer;
 		console.log(this.mapRouteServer);
-	}
+	}/*
+	overLoadCheck:function() {
+		let count = 0;
+		for(var i in serverData.mapRouteServer) {
+			if(i === httpAddress(this.address, this.httpPort)) {
+				++count;
+			}
+		}
+		if (count > 5) {
+			console.log('This Server is overloaded, spawn new server and connect to \n' 
+						+  httpAddress(this.address, this.httpPort) );
+		}
+	}*/
 }
