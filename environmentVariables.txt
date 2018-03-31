@@ -1,1 +1,1 @@
-export MY_SQL_USER=spinaashton MY_SQL_PASS=test PORT=3001 SPAWN=4000
+export MY_SQL_USER=spinaashton MY_SQL_PASS=test

@@ -35,8 +35,8 @@ function updateOtherServers(serverData){
 
 function broadcast(socketMap, message) {
 	for(let s in socketMap) {
-		if(socketMap[s] !== SELF_IDENTIFIER) {
-			socketMap[s].sendMessage(message);
+		if(socketMap[s].socket !== SELF_IDENTIFIER) {
+			socketMap[s].socket.sendMessage(message);
 		}
 	}
 }
@@ -44,18 +44,56 @@ function broadcast(socketMap, message) {
 function socketProtocol(socket, serverData) {
 	//TODO :: check if it already is in the map
 	socket.on('close', function() {
-		//TODO :: Find socket in socket map and remove it.
         console.log('Connection closed on socket');
+        //Removes closed socket from socketMap
+        console.log(serverData.socketMap);
+        let deadAddress;
+        for ( let s in serverData.socketMap ) {
+        	if ( serverData.socketMap[s].socket === socket ) {
+        		console.log("DEAD ADDRESS SET");
+        		deadAddress = serverData.socketMap[s].httpAddress;
+
+        		delete serverData.socketMap[s];
+        	}
+        }
+        //TODO :: Ensure mapRouteServer is equal on all servers
         //TODO :: Redistribute load
+        for ( let r in serverData.mapRouteServer ) { 
+        	if(serverData.mapRouteServer[r] !== deadAddress ) {
+        		if( serverData.mapRouteServer[r] === httpAddress(serverData.address, serverData.httpPort) ) {
+        			//TODO :: MAKE THIS IN A FUNCTION
+        			for( let route in serverData.mapRouteServer ) {
+        				console.log("DEAD ADDRESS SET TO" + deadAddress);
+        				if (serverData.mapRouteServer[route] === deadAddress) {
+        					console.log("DEAD ADDRESS FOUND");
+        					serverData.mapRouteServer[route] = httpAddress(serverData.address, serverData.httpPort);
+        				}
+        			}
+        			let message = {
+						command : "updateServerMap",
+						host : serverData.address,
+						httpPort : serverData.httpPort,
+						socketPort : serverData.socketPort,
+						mapRouteServer : serverData.mapRouteServer
+					}
+					broadcast(serverData.socketMap, message);
+			    }
+        		break;
+        	}
+        }
 	});
 	socket.on('message', function(data) {
 		if (data.success === false) {
 			console.log('Failed: ' + data.error);
 		} else {
+			//TODO :: httpAddress in socketMap undefined
 			console.log("Message received from " + data.host + ':' + data.socketPort);
 			if(serverData.socketMap[data.host + ':' + data.socketPort] == undefined) {
 				console.log("Adding Socket  " + data.host + ':' + data.socketPort);
-				serverData.socketMap[data.host + ':' + data.socketPort] =  socket;
+				serverData.socketMap[data.host + ':' + data.socketPort] =  {
+																socket : socket,
+																httpAddress : httpAddress(data.address, data.httpPort)
+															};
 			}
 	      	if(data.command === 'initialize'){
 	      		console.log("Address List " + data.socketAddressList);
@@ -64,19 +102,29 @@ function socketProtocol(socket, serverData) {
 				serverData.routeStations = data.routeStations;
 				serverData.appData = data.appData;
 
+				//Connects to all servers in socketMap
+				console.log( data.socketAddressList);
 				for(let i = 0; i < data.socketAddressList.length; ++i) {
-					let address = data.socketAddressList[i].split(':');
-					if(serverData.socketMap[data.socketAddressList[i]] == undefined) {
-						serverData.socketMap[data.socketAddressList[i]] = new JsonSocket(new net.Socket());
-						console.log('Address ' + data.socketAddressList[i]);
-						serverData.socketMap[data.socketAddressList[i]].connect(address[1], address[0], function() {
+					let address = data.socketAddressList[i].socketAddress.split(':');
+
+					if(serverData.socketMap[data.socketAddressList[i].socketAddress] == undefined) {
+						serverData.socketMap[data.socketAddressList[i].socketAddress] = {
+																			socket : new JsonSocket(new net.Socket()),
+																			httpAddress : data.socketAddressList[i].httpAddress
+																		}
+
+						console.log('Address ' + data.socketAddressList[i].socketAddress);
+
+						serverData.socketMap[data.socketAddressList[i].socketAddress].socket.connect(address[1], address[0], function() {
 							console.log('Established Connection with ' + address[1]);
-							serverData.socketMap[data.socketAddressList[i]].sendMessage({
+
+							serverData.socketMap[data.socketAddressList[i].socketAddress].socket.sendMessage({
 												command : 'hello',
 					      						host : serverData.address,
 						    					httpPort : serverData.httpPort,
 					    						socketPort : serverData.socketPort });
-					      	socketProtocol(serverData.socketMap[data.socketAddressList[i]], serverData);
+
+					      	socketProtocol(serverData.socketMap[data.socketAddressList[i].socketAddress].socket, serverData);
 					  	});
 					}
 				}
@@ -130,7 +178,10 @@ function init_socketServer(sockets, serverData){
 	});
 	sockets.netServer.listen(serverData.socketPort, serverData.address, function() {
 		serverData.socketPort = sockets.netServer.address().port;
-		serverData.socketMap[serverData.address + ':' + serverData.socketPort] = SELF_IDENTIFIER;
+		serverData.socketMap[serverData.address + ':' + serverData.socketPort] = {
+																					socket : SELF_IDENTIFIER,
+																					httpAddress : httpAddress(serverData.address, serverData.httpPort)
+																				}
 		console.log('To add a server to the cluster on via this server :\n export SPAWN=' 
 			+  serverData.address + ':' + serverData.socketPort + '; npm start;');
 		setInterval(updateOtherServers.bind(null, serverData), 5000);
