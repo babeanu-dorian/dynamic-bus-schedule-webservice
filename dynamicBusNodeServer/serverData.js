@@ -199,9 +199,7 @@ module.exports = {
 				++count;
 			}
 		}
-		console.log("COUNT" + count);
 		count = Math.floor(count / 2);
-		console.log("COUNT" + count);
 		for(let route in this.mapRouteServer) {
 			if(this.mapRouteServer[route] === httpAddress(this.address, this.httpPort)){
 				this.mapRouteServer[route] = address;
@@ -211,24 +209,30 @@ module.exports = {
 				}
 			}
 		}
-		console.log("COUNT" + count);
 		callback();
 	},
 	setMapRouteServer:function(mapRouteServer) {
 		this.mapRouteServer = mapRouteServer;
 		this.appData.mapRouteServer = mapRouteServer;
 		console.log(this.mapRouteServer);
-	}/*
+	},
 	overLoadCheck:function() {
 		let count = 0;
-		for(var i in serverData.mapRouteServer) {
-			if(i === httpAddress(this.address, this.httpPort)) {
+		for(var i in this.mapRouteServer) {
+			if(this.mapRouteServer[i] === httpAddress(this.address, this.httpPort)) {
 				++count;
 			}
 		}
 		if (count > 5) {
-			console.log('This Server is overloaded, spawn new server and connect to \n' 
-						+  httpAddress(this.address, this.httpPort) );
+			console.log('This Server is overloaded, spawn a new server with :\n' +
+						'export SPAWN=' +  this.address + ':' + this.socketPort + '; npm start;');
 		}
-	}*/
+	},
+	unionRouteStations:function(payload) {
+		for(var r in payload) {
+			this.routeStations[r].delay = payload[r].delay;
+			this.routeStations[r].buses = payload[r].buses;
+		}
+		console.log('Route Stations Updated');
+	}
 }

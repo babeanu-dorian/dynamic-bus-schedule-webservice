@@ -4,6 +4,34 @@ const socket_address_list = require('./utility/socket_address_list');
 
 var net = require('net');
 	JsonSocket = require('json-socket');
+/*
+ *  serverData.routeStations;
+ */
+function updateOtherServers(serverData){
+	let batch = [];
+	for(var r in serverData.routeStations) {
+		if(serverData.mapRouteServer[r] === httpAddress(serverData.address, serverData.httpPort)) {
+			for(var s in serverData.routeStations[r].stations) {
+				let currentStation = {
+					delay : s.delay,
+					buses : s.buses
+				}
+				batch[r] = currentStation;
+			}
+		}
+	}
+
+	let message = {
+		command : 'updateRouteStations',
+		host : serverData.address,
+		httpPort : serverData.httpPort,
+		socketPort : serverData.socketPort,
+		payload : batch
+
+	}
+	broadcast(serverData.socketMap, message);
+	serverData.overLoadCheck();
+}	
 
 function broadcast(socketMap, message) {
 	for(let s in socketMap) {
@@ -82,6 +110,9 @@ function socketProtocol(socket, serverData) {
 		    if(data.command === 'updateServerMap') {
 	      		serverData.setMapRouteServer(data.mapRouteServer);
 		    }
+		    if(data.command === 'updateRouteStations') {
+		    	serverData.unionRouteStations(data.payload);
+		    }
 		}
 	});
 }
@@ -91,8 +122,7 @@ function socketProtocol(socket, serverData) {
 **/
 function init_socketServer(sockets, serverData){
 	serverData.socketMap = {};
-	serverData.socketMap[serverData.address + ':' + serverData.socketPort] = SELF_IDENTIFIER; //ensure yourself is in the list
-
+	 //ensure yourself is in the list
 	sockets.netServer = net.createServer(function(socket) {
 		console.log('Client Connected');
 		socket = new JsonSocket(socket); //decorate net.Socket as JSONSocket
@@ -100,12 +130,16 @@ function init_socketServer(sockets, serverData){
 	});
 	sockets.netServer.listen(serverData.socketPort, serverData.address, function() {
 		serverData.socketPort = sockets.netServer.address().port;
-		console.log("This socketPort is " + serverData.socketPort);
+		serverData.socketMap[serverData.address + ':' + serverData.socketPort] = SELF_IDENTIFIER;
+		console.log('To add a server to the cluster on via this server :\n export SPAWN=' 
+			+  serverData.address + ':' + serverData.socketPort + '; npm start;');
+		setInterval(updateOtherServers.bind(null, serverData), 5000);
 	});
 	console.log('Socket Server Initialized');
 	if(process.env.SPAWN){
 		let socket = new JsonSocket(new net.Socket());
-	  	socket.connect(process.env.SPAWN, serverData.address, function() {
+		let socketConnection = (process.env.SPAWN).split(':');
+	  	socket.connect(socketConnection[1], socketConnection[0], function() {
 	      	console.log('Connected\n');
 	      	socket.sendMessage({command : 'requestData',
 	      						host : serverData.address,
