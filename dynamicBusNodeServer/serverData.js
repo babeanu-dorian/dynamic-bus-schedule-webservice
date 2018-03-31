@@ -1,6 +1,20 @@
 var ip = require('ip');
+const httpAddress = require('./utility/http_address');
 
-function init_routeStations(serverData) {
+/**
+ * members :
+ *	database
+ *  mapRouteServer
+ *  stationRoutes
+ *  appData
+ *  routeStations
+ *  address
+ *  httpPort
+ *  socketPort
+ *  socketMap
+ */
+
+function init_routeStations(serverData, sockets) {
 	// TODO: take current month and time of day into account, instead of 0
 	serverData.database.query('SELECT StationsOnRoute.Route AS route, StationsOnRoute.Station AS station, StationsOnRoute.Location AS location, StationsOnRoute.CurrentDelay AS delay, ExpectedTimes.Duration AS duration FROM StationsOnRoute INNER JOIN ExpectedTimes ON StationsOnRoute.Route = ExpectedTimes.Route AND StationsOnRoute.Station = ExpectedTimes.Station AND ExpectedTimes.Hour = 0 AND ExpectedTimes.Month = 0 ORDER BY route, location',
 		function (error, results, fields) {
@@ -32,18 +46,20 @@ function init_routeStations(serverData) {
 			}
 		}
 	);
+	sockets.init(serverData);
 }
 
-function init_appData(serverData) {
+function init_appData(serverData, sockets) {
 	serverData.appData = {
 		mapRouteServer: serverData.mapRouteServer,
 		stationRoutes: serverData.stationRoutes
 	}
+	console.log("ServerMap Initialized");
 
-	init_routeStations(serverData);
+	init_routeStations(serverData, sockets);
 }
 
-function init_stationRoutes(serverData) {
+function init_stationRoutes(serverData, sockets) {
 	serverData.database.query('SELECT Stations.Id AS id, Stations.Name AS name, StationsOnRoute.Route AS route FROM Stations INNER JOIN StationsOnRoute ON Stations.Id = StationsOnRoute.Station ORDER BY id', 
 		function (error, results, fields) {
 			serverData.stationRoutes = [];
@@ -69,28 +85,33 @@ function init_stationRoutes(serverData) {
 				if (typeof station.id !== 'undefined')
 					serverData.stationRoutes.push(station);
 			}
-			init_appData(serverData);
+			init_appData(serverData, sockets);
 		}
 	);
 }
 
-function init_mapRouteServer(serverData) {
+function init_mapRouteServer(serverData, sockets) {
 	// setup route to server map
-	// TODO: do this differently once sockets are up and running
-
-	serverData.database.query('SELECT Id AS id FROM Routes', function (error, results, fields) {
-		serverData.mapRouteServer = {};
-		if (error) {
-			console.log(error);
-		}
-		else {
-			for (let i = 0; i != results.length; ++i) {
-				serverData.mapRouteServer['r' + results[i].id] = serverData.address;
+	serverData.mapRouteServer = {};
+	if(!process.env.SPAWN){
+		serverData.database.query('SELECT Id AS id FROM Routes', function (error, results, fields) {	
+			if (error) {
+				console.log(error);
 			}
-		}
+			else {
+				for (let i = 0; i != results.length; ++i) {
+					serverData.mapRouteServer['r' + results[i].id] = 'http://' + serverData.address + ':' + serverData.httpPort + '/';
+				}
+			}
+		});
+	}
+	init_stationRoutes(serverData, sockets);
+}
 
-		init_stationRoutes(serverData);
-	});
+function unionObjects (obj1, obj2) {
+	for(var i in obj2) {
+		obj1[i] = obj2[i];
+	}
 }
 
 module.exports = {
@@ -99,7 +120,7 @@ module.exports = {
 	//   (keep in mind that the bus delays per station are relative to the station delay)
 	// - update the station delay in the database (table StationsOnRoute)
 	// - update the expected times in the database based on the recorded times (once a day ?)
-	init:function(port) {
+	init:function(port, sockets) {
 		if (!process.env.MY_SQL_USER) {
 			console.log('Environment variable MY_SQL_USER not set, abort');
 			process.exit();
@@ -117,9 +138,12 @@ module.exports = {
 			database: 'DynamicBusSchedulingServer'
 		});
 
-		this.address = 'http://' + ip.address() + ':' + port + '/';
+		//this.address = 'http://' + ip.address() + ':' + port + '/';
+		this.address = '127.0.0.1';
+		this.httpPort = port;
+		this.socketPort = port + 1000;
 
-		init_mapRouteServer(this);
+		init_mapRouteServer(this, sockets);
 	},
 	setBusArrivalTimes:function(bus, route, progress) {
 		let stationOrder = this.routeStations['r' + route].stationOrder;
@@ -157,5 +181,30 @@ module.exports = {
 			}
 			prevStationTime = arrivalTime;
 		}
+	},
+	/**
+	 * Splits the load of routes handled by this server in half
+	 * and assigns them to the address provided in the parameters
+	 */
+	splitLoad:function(address, callback) {
+		let count = 0;
+
+		for(let route in this.mapRouteServer) {
+			if(this.mapRouteServer[route] === httpAddress(this.address, this.httpPort)){
+				++count;
+			}
+		}
+		count /= 2;
+		for(let route in this.mapRouteServer) {
+			if(this.mapRouteServer[route] === httpAddress(this.address, this.httpPort)){
+				this.mapRouteServer[route] = address;
+				console.log(address);
+				--count;
+				if(count == 0) {
+					break;
+				}
+			}
+		}
+		callback();
 	}
 }
