@@ -11,22 +11,21 @@ router.post('/', function(req, res, next) {
 
 	console.log(req.body);
 
-    let busId = req.body.id;
+    let busId = parseInt(req.body.id);
     let key = req.body.key;
-    let route = req.body.route;
-    let progress = req.body.progress;
+    let route = parseInt(req.body.route);
+    let progress = parseFloat(req.body.progress);
 
     if (
-        !Number.isInteger(busId) || busId < 0 ||
-        typeof key !== 'string' || key.length !== keyLength ||
-        !Number.isInteger(route) || route < 0 ||
-        Number(progress) !== progress || progress < 0.0 || progress > 1.0
+        isNaN(busId) || busId < 0 || key.length !== keyLength ||
+        isNaN(route) || route < 0 || serverData.routeStations['r' + route] === undefined ||
+        isNaN(progress) || progress < 0.0 || progress > 1.0
     ) {
         res.status(400);
         res.send();
     } else {
         // check if the bus exists, if it handles the provided route, if the provided key is correct
-        serverData.database.query('SELECT Route AS route, AuthenticationKey AS key FROM Buses WHERE Id = ?', [busId],
+        serverData.database.query('SELECT Route AS route, AuthenticationKey AS \'key\' FROM Buses WHERE Id = ?', [busId],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);

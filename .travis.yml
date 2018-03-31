@@ -30,3 +30,6 @@ before_script:
 script:
   - npm install
   - npm test
+
+after_success: 
+  - npm run coverage

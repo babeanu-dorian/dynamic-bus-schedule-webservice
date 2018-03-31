@@ -60,6 +60,6 @@ res = {
 	body:{
 		serverOfRoute:<the address of the server handling that route, the app will update its route to server map
 						if this is different than the one used to send the request, and send the request to the new address, schedule is undefined in that case>
-		schedule:[<array of objects of type {route, station, seconds to arrival}>]
+		schedule:[<array of objects of type {route, station, arrivalTime}>]
 	}
 }

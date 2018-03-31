@@ -18,7 +18,7 @@ describe('Route Data', () => {
 			station: "0"
 		}
 		chai.request(server)
-			.post('/busData')
+			.post('/routedata')
 			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(200);
@@ -32,7 +32,7 @@ describe('Route Data', () => {
 					res.body.schedule[i].route.should.be.eql(0);
 					res.body.schedule[i].should.have.property('station');
 					res.body.schedule[i].station.should.be.eql(0);
-					res.body.schedule[i].should.have.property('secondsToArrival');
+					res.body.schedule[i].should.have.property('arrivalTime');
 				}
 				done();
 			});
@@ -45,7 +45,7 @@ describe('Route Data', () => {
 			station: "0"
 		}
 		chai.request(server)
-			.post('/busData')
+			.post('/routedata')
 			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(400);
@@ -60,7 +60,7 @@ describe('Route Data', () => {
 			station: "-1"
 		}
 		chai.request(server)
-			.post('/busData')
+			.post('/routedata')
 			.send(routeData)
 			.end((err, res) => {
 				res.should.have.status(400);
@@ -69,4 +69,3 @@ describe('Route Data', () => {
 		});
 	});
 });
-

@@ -3,18 +3,17 @@ var serverData = require('../serverData');
 
 // POST data
 router.post('/', function(req, res, next) {
-	// TODO: handle the time as well
-	let route = req.body.route;
-	let station = req.body.station;
-	let time = req.body.time;
 
-	// TODO: make a function that does this check, the condition of this 'if' is ridiculous
+	let route = parseInt(req.body.route);
+	// set station to undefined if it is null or undefined (use ==, not ===)
+	let station = (req.body.station == null ? undefined : parseInt(req.body.station));
+	let time = req.body.time; // TODO: process this somehow
+
 	// test for bad requests; TODO: check for time once the type is decided
 	if (
-		!Number.isInteger(route) || route < 0 ||
-		(typeof station !== 'undefined' && station !== null &&
-		(!Number.isInteger(station) || station < 0 ||
-		typeof serverData.routeStations.stations['s' + station] === 'undefined')) //|| (typeof time !== 'undefined' && ...)
+		isNaN(route) || route < 0 || serverData.routeStations['r' + route] === undefined ||
+		(station !== undefined && (isNaN(station) || station < 0 ||
+		serverData.routeStations['r' + route].stations['s' + station] === undefined))
 	) {
 		res.status(400);
 		res.send();

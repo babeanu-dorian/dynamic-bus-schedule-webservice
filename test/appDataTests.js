@@ -9,25 +9,12 @@ var should = chai.should();
 
 chai.use(chatHttp);
 
-describe('GET index', () => {
-	it('it should GET the index', (done) => {
-		chai.request(server)
-			.get('/')
-			.end((err, res) => {
-				//console.log(res);
-				res.should.have.status(200);
-				done();
-			});
-	});
-});
-
 describe('App Data', () => {
 	describe('GET general data about routes and stations', () => {
 		it('it should get all general data about all routes and stations on the routes', (done) => {
 			chai.request(server)
-				.get('/appData')
+				.get('/appdata')
 				.end((err, res) => {
-					//console.log(res.body);
 					res.should.have.status(200);
 					res.body.should.be.a('object');
 					res.body.should.have.property('mapRouteServer');

@@ -71,8 +71,8 @@
 	                </thead>
 	                <tbody>
 		                <tr ng-repeat="x in schedule">
-		                    <td>{{x.arrivalTime}}</td>
 		                    <td>{{x.route}}</td>
+		                    <td>{{x.arrivalTime}}</td>
 		                    <td>{{x.station}}</td>
 		                    <td><span class="label label-success">{{x.status}}</span>
 		                    </td>                                       
@@ -151,7 +151,7 @@
 							// TODO: convert arrival times to 24h format
 							// (from seconds relative to the moment of the request)
 							// TODO: add the elements in the order of the arival times 
-							$scope.schedule.concat(response.data.schedule);
+							$scope.schedule = $scope.schedule.concat(response.data.schedule);
 						}
 			    	},
 			    	function(response) {		// error, TODO
