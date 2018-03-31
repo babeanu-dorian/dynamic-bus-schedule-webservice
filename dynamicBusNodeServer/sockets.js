@@ -61,7 +61,7 @@ function socketProtocol(socket, serverData){
 			    console.log('requestWork');
 		    }
 		    if(data.command === 'hello') {
-		    	console.log("Server said Hello");
+		    	console.log("Server established Socket");
 		    }
 		}
 	});
@@ -79,7 +79,10 @@ function init_socketServer(sockets, serverData){
 		socket = new JsonSocket(socket); //decorate net.Socket as JSONSocket
 		socketProtocol(socket, serverData);
 	});
-	sockets.netServer.listen(serverData.socketPort, serverData.address);
+	sockets.netServer.listen(serverData.socketPort, serverData.address, function() {
+		this.socketPort = sockets.netServer.address().port;
+		console.log("This socketPort is " + this.socketPort);
+	});
 	console.log('Socket Server Initialized');
 	if(process.env.SPAWN){
 		let socket = new JsonSocket(new net.Socket());

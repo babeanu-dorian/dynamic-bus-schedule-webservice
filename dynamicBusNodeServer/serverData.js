@@ -139,16 +139,18 @@ module.exports = {
 		});
 
 		//this.address = 'http://' + ip.address() + ':' + port + '/';
-		this.address = '127.0.0.1';
+		this.address = ip.address();
 		this.httpPort = port;
-		this.socketPort = port + 1000;
+		this.socketPort = 0;
+
+		console.log("This address is : " + httpAddress(this.address, this.httpPort));
 
 		init_mapRouteServer(this, sockets);
 	},
 	setBusArrivalTimes:function(bus, route, progress) {
 		let stationOrder = this.routeStations['r' + route].stationOrder;
 		let stations = this.routeStations['r' + route].stations;
-		let nextStationIdx = 0; // assumpton: there's at least a station on that route
+		let nextStationIdx = 0; // assumption: there's at least a station on that route
 
 		// find the next station for the bus
 		for (let i = 1; i != stationOrder.length; ++i) {
