@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var serverData = require('../serverData');
+const httpAddress = require('../utility/http_address');
 
 // POST data
 router.post('/', function(req, res, next) {
@@ -22,7 +23,7 @@ router.post('/', function(req, res, next) {
 			serverOfRoute:serverData.mapRouteServer['r' + route],
 			schedule:[]
 		};
-		if (response.serverOfRoute === serverData.address) {
+		if (response.serverOfRoute === httpAddress(serverData.address, serverData.httpPort)) {
 			if (typeof station === 'undefined' || station === null) {
 				for (let station in serverData.routeStations['r' + route].stations) {
 					for (let bus in serverData.routeStations['r' + route].stations[station].buses) {

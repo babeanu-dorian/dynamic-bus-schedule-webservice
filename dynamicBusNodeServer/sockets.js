@@ -1,10 +1,19 @@
+const SELF_IDENTIFIER = -1;
 const httpAddress = require('./utility/http_address');
 const socket_address_list = require('./utility/socket_address_list');
 
 var net = require('net');
 	JsonSocket = require('json-socket');
 
-function socketProtocol(socket, serverData){
+function broadcast(socketMap, message) {
+	for(let s in socketMap) {
+		if(socketMap[s] !== SELF_IDENTIFIER) {
+			socketMap[s].sendMessage(message);
+		}
+	}
+}
+
+function socketProtocol(socket, serverData) {
 	//TODO :: check if it already is in the map
 	socket.on('close', function() {
 		//TODO :: Find socket in socket map and remove it.
@@ -44,24 +53,34 @@ function socketProtocol(socket, serverData){
 					}
 				}
 	      		console.log('initialize');
-	      		console.log(serverData.mapRouteServer);
 	      	}
 	      	if(data.command === 'requestWork'){
-
-	      		serverData.splitLoad(httpAddress(data.host, data.httpPort), socket.sendMessage.bind( socket, 
-	      							{ command : "initialize",
+	      		serverData.splitLoad(httpAddress(data.host, data.httpPort), broadcast.bind( null,
+	      							serverData.socketMap, 
+	      							{ command : "updateServerMap",
+		    						host : serverData.address,
+		    						httpPort : serverData.httpPort,
+		    						socketPort : serverData.socketPort,
+									mapRouteServer : serverData.mapRouteServer})
+	      		);
+	      		console.log(serverData.mapRouteServer);
+			    console.log('requestWork');
+		    }
+		    if(data.command === 'requestData') {
+	      		socket.sendMessage({ command : "initialize",
 		    						host : serverData.address,
 		    						httpPort : serverData.httpPort,
 		    						socketPort : serverData.socketPort,
 									appData : serverData.appData,
 									routeStations : serverData.routeStations, 
-									socketAddressList : socket_address_list(serverData.socketMap)})
-	      		);
-
-			    console.log('requestWork');
+									socketAddressList : socket_address_list(serverData.socketMap)});
+	      		console.log('requestData');
 		    }
 		    if(data.command === 'hello') {
 		    	console.log("Server established Socket");
+		    }
+		    if(data.command === 'updateServerMap') {
+	      		serverData.setMapRouteServer(data.mapRouteServer);
 		    }
 		}
 	});
@@ -72,7 +91,7 @@ function socketProtocol(socket, serverData){
 **/
 function init_socketServer(sockets, serverData){
 	serverData.socketMap = {};
-	serverData.socketMap[serverData.address + ':' + serverData.socketPort] = -1; //ensure yourself is in the list
+	serverData.socketMap[serverData.address + ':' + serverData.socketPort] = SELF_IDENTIFIER; //ensure yourself is in the list
 
 	sockets.netServer = net.createServer(function(socket) {
 		console.log('Client Connected');
@@ -80,18 +99,28 @@ function init_socketServer(sockets, serverData){
 		socketProtocol(socket, serverData);
 	});
 	sockets.netServer.listen(serverData.socketPort, serverData.address, function() {
-		this.socketPort = sockets.netServer.address().port;
-		console.log("This socketPort is " + this.socketPort);
+		serverData.socketPort = sockets.netServer.address().port;
+		console.log("This socketPort is " + serverData.socketPort);
 	});
 	console.log('Socket Server Initialized');
 	if(process.env.SPAWN){
 		let socket = new JsonSocket(new net.Socket());
 	  	socket.connect(process.env.SPAWN, serverData.address, function() {
 	      	console.log('Connected\n');
-	      	socket.sendMessage({command : 'requestWork',
+	      	socket.sendMessage({command : 'requestData',
 	      						host : serverData.address,
 		    					httpPort : serverData.httpPort,
-	    						socketPort : serverData.socketPort });
+	    						socketPort : serverData.socketPort }, function(err) {
+	    							if(err)
+	    								throw err;
+	    							socket.sendMessage( {command : 'requestWork',
+							      						host : serverData.address,
+								    					httpPort : serverData.httpPort,
+							    						socketPort : serverData.socketPort}, function(err) {
+							    							if(err)
+							    								throw err;
+							    						});
+	    							});
 
 	      	socketProtocol(socket, serverData);
 

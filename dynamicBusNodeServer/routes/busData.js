@@ -1,6 +1,7 @@
 var router = require('express').Router();
 
 var serverData = require('../serverData');
+const httpAddress = require('../utility/http_address');
 
 const keyLength = 16;
 
@@ -40,7 +41,7 @@ router.post('/', function(req, res, next) {
                             serverOfRoute:serverData.mapRouteServer['r' + route],
                             route:route
                         };
-                        if (response.serverOfRoute === serverData.address) {
+                        if (response.serverOfRoute === httpAddress(serverData.address, serverData.httpPort)) {
                             serverData.setBusArrivalTimes(busId, route, progress)
                         }
                         res.json(response);

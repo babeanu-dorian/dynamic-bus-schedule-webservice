@@ -100,7 +100,7 @@ function init_mapRouteServer(serverData, sockets) {
 			}
 			else {
 				for (let i = 0; i != results.length; ++i) {
-					serverData.mapRouteServer['r' + results[i].id] = 'http://' + serverData.address + ':' + serverData.httpPort + '/';
+					serverData.mapRouteServer['r' + results[i].id] = httpAddress(serverData.address, serverData.httpPort);
 				}
 			}
 		});
@@ -141,7 +141,10 @@ module.exports = {
 		//this.address = 'http://' + ip.address() + ':' + port + '/';
 		this.address = ip.address();
 		this.httpPort = port;
-		this.socketPort = 0;
+		if(process.env.PORT)
+			this.socketPort = port + 1000;
+		else 	
+			this.socketPort = 0;
 
 		console.log("This address is : " + httpAddress(this.address, this.httpPort));
 
@@ -196,17 +199,24 @@ module.exports = {
 				++count;
 			}
 		}
-		count /= 2;
+		console.log("COUNT" + count);
+		count = Math.floor(count / 2);
+		console.log("COUNT" + count);
 		for(let route in this.mapRouteServer) {
 			if(this.mapRouteServer[route] === httpAddress(this.address, this.httpPort)){
 				this.mapRouteServer[route] = address;
-				console.log(address);
 				--count;
 				if(count == 0) {
 					break;
 				}
 			}
 		}
+		console.log("COUNT" + count);
 		callback();
+	},
+	setMapRouteServer:function(mapRouteServer) {
+		this.mapRouteServer = mapRouteServer;
+		this.appData.mapRouteServer = mapRouteServer;
+		console.log(this.mapRouteServer);
 	}
 }

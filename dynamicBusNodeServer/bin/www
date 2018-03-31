@@ -26,7 +26,6 @@ var port = normalizeValue(process.env.PORT || 0);
 server.listen(port, function(){
     port = server.address().port;
     app.set('port', port);
-
     // establish database connection and store static data in memory
     serverData.init(port, sockets);
 });
