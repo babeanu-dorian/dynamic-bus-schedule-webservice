@@ -148,7 +148,7 @@
 							// update server map and list and make the request to the new address
 							mapRouteServer['r' + data.route] = response.data.serverOfRoute;
 							pushUnique(serverList, response.data.serverOfRoute);
-							makeRouteDataRequest($http, $scope, data);
+							makeRouteDataRequest($scope, $http, data);
 						} else {
 							// TODO: convert arrival times to 24h format
 							// (from seconds relative to the moment of the request)
