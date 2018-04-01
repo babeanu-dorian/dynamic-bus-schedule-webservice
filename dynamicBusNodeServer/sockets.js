@@ -4,6 +4,23 @@ const socket_address_list = require('./utility/socket_address_list');
 
 var net = require('net');
 	JsonSocket = require('json-socket');
+
+function establishSocket(serverData, socketAddress, socketPort) {
+	serverData.socketMap[socketAddress] = {
+											socket : new JsonSocket(new net.Socket()),
+											httpAddress : socketAddress
+										}
+	serverData.socketMap[socketAddress].socket.connect(socketPort, socketAddress, function() {
+		console.log('Established Connection with ' + socketPort);
+
+		serverData.socketMap[socketAddress].socket.sendMessage({
+			command : 'hello',
+				host : serverData.address,
+			httpPort : serverData.httpPort,
+			socketPort : serverData.socketPort });
+      	socketProtocol(serverData.socketMap[socketAddress].socket, serverData);
+  	});
+}
 /*
  *  serverData.routeStations;
  */
@@ -86,14 +103,22 @@ function socketProtocol(socket, serverData) {
 		if (data.success === false) {
 			console.log('Failed: ' + data.error);
 		} else {
-			//TODO :: httpAddress in socketMap undefined
 			console.log("Message received from " + data.host + ':' + data.socketPort);
+			//TODO :: Deal with dead addresses.
 			if(serverData.socketMap[data.host + ':' + data.socketPort] == undefined) {
 				console.log("Adding Socket  " + data.host + ':' + data.socketPort);
 				serverData.socketMap[data.host + ':' + data.socketPort] =  {
 																socket : socket,
 																httpAddress : httpAddress(data.address, data.httpPort)
 															};
+				//If a new socket has been added, broadcast to other servers about it's existence to ensure entire cluster
+				//is aware of new server even in case of failure mid update.
+				broadcast(serverData.socketMap, {command : 'updateSockets',
+					      						host : serverData.address,
+						    					httpPort : serverData.httpPort,
+					    						socketPort : serverData.socketPort,
+					    						socketToAddress : data.host,
+					    						socketToPort :  data.socketPort });
 			}
 	      	if(data.command === 'initialize'){
 	      		console.log("Address List " + data.socketAddressList);
@@ -108,24 +133,7 @@ function socketProtocol(socket, serverData) {
 					let address = data.socketAddressList[i].socketAddress.split(':');
 
 					if(serverData.socketMap[data.socketAddressList[i].socketAddress] == undefined) {
-						serverData.socketMap[data.socketAddressList[i].socketAddress] = {
-																			socket : new JsonSocket(new net.Socket()),
-																			httpAddress : data.socketAddressList[i].httpAddress
-																		}
-
-						console.log('Address ' + data.socketAddressList[i].socketAddress);
-
-						serverData.socketMap[data.socketAddressList[i].socketAddress].socket.connect(address[1], address[0], function() {
-							console.log('Established Connection with ' + address[1]);
-
-							serverData.socketMap[data.socketAddressList[i].socketAddress].socket.sendMessage({
-												command : 'hello',
-					      						host : serverData.address,
-						    					httpPort : serverData.httpPort,
-					    						socketPort : serverData.socketPort });
-
-					      	socketProtocol(serverData.socketMap[data.socketAddressList[i].socketAddress].socket, serverData);
-					  	});
+						establishSocket(serverData, address[0], address[1]);
 					}
 				}
 	      		console.log('initialize');
@@ -160,6 +168,12 @@ function socketProtocol(socket, serverData) {
 		    }
 		    if(data.command === 'updateRouteStations') {
 		    	serverData.unionRouteStations(data.payload);
+		    }
+		    if(data.command === 'updateSockets') {
+		    	console.log("Checking Socket Connections");
+		    	if(serverData.socketMap[data.socketToAddress] == undefined) {
+		    		establishSocket(serverData, data.socketToAddress, data.socketToPort);
+		    	}
 		    }
 		}
 	});
