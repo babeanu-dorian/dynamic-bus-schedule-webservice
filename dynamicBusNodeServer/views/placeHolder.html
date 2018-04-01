@@ -48,7 +48,7 @@
 					    </select>
 					  </div>
 				    <div class="col-auto my-1">
-							<select class="custom-select mr-sm-2" name="stationSelect" ng-model="selectedStation" ng-options="x.name for x in stationRoutes">
+							<select class="custom-select mr-sm-2" name="stationSelect" ng-model="selectedStation" ng-options="x.name for x in getStationsOfRoute()">
 								<option selected value>all</option>
 					    </select>
 					  </div>
@@ -66,14 +66,14 @@
 	                        <th>Bus Number</th>
 	                        <th>Estimated Arrival</th>
 	                        <th>Station</th>
-	                        <th>Status</th>                                          
+	                        <th>Status</th>                   
 	                    </tr>
 	                </thead>
 	                <tbody>
-		                <tr ng-repeat="x in schedule">
+		                <tr ng-repeat="x in schedule | orderBy: 'arrivalTime'">
 		                    <td>{{x.route}}</td>
-		                    <td>{{x.arrivalTime}}</td>
-		                    <td>{{x.station}}</td>
+		                    <td>{{covertToCurrTime(x.arrivalTime)}}</td>
+		                    <td>{{findStation(x.station)}}</td>
 		                    <td><span class="label label-success">{{x.status}}</span>
 		                    </td>                                       
 		                </tr>                            
@@ -100,6 +100,8 @@
 		var allServersMightBeDown = false;  // set to true when workingServer exided serverList.length and
 											// has to restart from 0; if already true, the servers are assumed
 											// to be down; reset to false upon successfully reaching a server
+
+		var requestData;
 
 		function handleError(err, callback) {
 			// TODO check if the error is a connection failure before running the code below
@@ -150,7 +152,7 @@
 						} else {
 							// TODO: convert arrival times to 24h format
 							// (from seconds relative to the moment of the request)
-							// TODO: add the elements in the order of the arival times 
+							// TODO: add the elements in the order of the arival times
 							$scope.schedule = $scope.schedule.concat(response.data.schedule);
 						}
 			    	},
@@ -178,7 +180,7 @@
 		}
 
 		var app = angular.module('scheduleApp', []);
-		app.controller('scheduleController', function($scope, $http) {
+		app.controller('scheduleController', function($scope, $http, $interval) {
 			/*
 			// placeholder values, delete once the server can handle GET /appData
 			$scope.stationRoutes = [
@@ -199,7 +201,7 @@
 
 		    $scope.getRouteData = function(){
 		    	$scope.schedule = [];
-		    	var requestData = { 'time':$scope.selectedTime };
+		    	requestData = { 'time':$scope.selectedTime };
 		    	if ($scope.selectedStation) {
 		    		requestData.station = $scope.selectedStation.id;
 		    	}
@@ -218,10 +220,43 @@
 		    	}
 		    }
 
+		    $scope.findStation = function(id) {
+    			return $scope.stationRoutes.find(x => x.id === id).name;
+  			}
+
+  			$scope.getStationsOfRoute = function() {
+  				var stationsOfRoute = [];
+  				if($scope.selectedRoute == null) {
+  					return $scope.stationRoutes;
+  				}
+  				for(var i = 0 ; i < $scope.stationRoutes.length; i++) {
+  					for(var j = 0 ; j < $scope.stationRoutes[i].routes.length ; j++) {
+  						if($scope.stationRoutes[i].routes[j] === $scope.selectedRoute) {
+  							stationsOfRoute.push($scope.stationRoutes[i]);
+  						}
+  					}
+  				}
+  				return stationsOfRoute;
+  			}
+
+  			$scope.covertToCurrTime = function(time) {
+  				var date = new Date();
+  				date.setSeconds(date.getSeconds() + time);
+  				return date.getHours() + ':' + date.getMinutes();
+  			}
+
 		    $scope.stationRoutes = [];
 		    $scope.routes = [];
 		    makeAppDataRequest($scope, $http);
 
+		    var reloadPage = function() {
+				if(requestData) {
+					$scope.schedule = [];
+					makeRouteDataRequest($scope, $http, requestData);
+				}
+			}
+			console.log($scope);
+		    $interval(reloadPage, 10000);	
 		});
 	</script>
 </html>
