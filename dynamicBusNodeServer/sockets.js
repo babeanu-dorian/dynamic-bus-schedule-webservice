@@ -63,9 +63,9 @@ function socketProtocol(socket, serverData) {
         		if( serverData.mapRouteServer[r] === httpAddress(serverData.address, serverData.httpPort) ) {
         			//TODO :: MAKE THIS IN A FUNCTION
         			for( let route in serverData.mapRouteServer ) {
-        				console.log("DEAD ADDRESS SET TO" + deadAddress);
+        				//console.log("DEAD ADDRESS SET TO" + deadAddress);
         				if (serverData.mapRouteServer[route] === deadAddress) {
-        					console.log("DEAD ADDRESS FOUND");
+        					//console.log("DEAD ADDRESS FOUND");
         					serverData.mapRouteServer[route] = httpAddress(serverData.address, serverData.httpPort);
         				}
         			}
@@ -92,7 +92,7 @@ function socketProtocol(socket, serverData) {
 				console.log("Adding Socket  " + data.host + ':' + data.socketPort);
 				serverData.socketMap[data.host + ':' + data.socketPort] =  {
 																socket : socket,
-																httpAddress : httpAddress(data.address, data.httpPort)
+																httpAddress : httpAddress(data.host, data.httpPort)
 															};
 			}
 	      	if(data.command === 'initialize'){
