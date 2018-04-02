@@ -8,9 +8,8 @@ router.post('/', function(req, res, next) {
 	let route = parseInt(req.body.route);
 	// set station to undefined if it is null or undefined (use ==, not ===)
 	let station = (req.body.station == null ? undefined : parseInt(req.body.station));
-	let time = req.body.time; // TODO: process this somehow
 
-	// test for bad requests; TODO: check for time once the type is decided
+	// test for bad requests;
 	if (
 		isNaN(route) || route < 0 || serverData.routeStations['r' + route] === undefined ||
 		(station !== undefined && (isNaN(station) || station < 0 ||

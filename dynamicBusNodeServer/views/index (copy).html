@@ -97,11 +97,12 @@
 
 		function handleError(err, callback) {
 			console.log(err);
-			if( err.status >= 500 ) {
+			//reload on server errors
+			if( err >= 500 ) {
 				window.location.reload(0);
 			}
 			++workingServer;
-			if (workingServer === serverList.length) {
+			else if (workingServer === serverList.length) {
 				workingServer = 0;
 				if (allServersMightBeDown)
 					window.location.reload(0); // all servers are down, try to reload
@@ -173,7 +174,6 @@
 		app.controller('scheduleController', function($scope, $http, $interval) {
 		    $scope.getRouteData = function(){
 		    	$scope.schedule = [];
-		    	requestData = {  };
 		    	console.log($scope);
 		    	selectedStation = null;
 		    	selectedRoute = null;
@@ -188,6 +188,7 @@
 		    	} else if ($scope.selectedStation != null) {
 		    		// if the route is not specified, make a request for each route containing the station
 		    		for (var i = 0; i != $scope.selectedStation.routes.length; ++i) {
+		    			console.log("is it this?");
 		    			requestData.route = $scope.selectedStation.routes[i];
 		    			makeRouteDataRequest($scope, $http, requestData);
 		    		}
