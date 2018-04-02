@@ -4,7 +4,8 @@ use DynamicBusSchedulingServer;
 
 CREATE TABLE Stations(
 	Id INT UNSIGNED NOT NULL,
-	AuthenticationKey CHAR(16) NOT NULL,      -- used to authenticte the timetable devices
+	Name VARCHAR(255) NOT NULL,
+	AuthenticationKey CHAR(16) NOT NULL,      -- used to authenticate the timetable devices
 	PRIMARY KEY (Id)
 );
 
@@ -16,7 +17,7 @@ CREATE TABLE Routes(
 CREATE TABLE Buses(
 	Id INT UNSIGNED NOT NULL,
 	Route INT UNSIGNED,                        -- busses can have 0 or 1 routes
-	AuthenticationKey CHAR(16) NOT NULL,       -- used to authenticte the vehicle
+	AuthenticationKey CHAR(16) NOT NULL,       -- used to authenticate the vehicle
 	PRIMARY KEY (Id),
 	FOREIGN KEY (Route) REFERENCES Routes(Id) ON DELETE SET NULL ON UPDATE CASCADE
 );

@@ -1,0 +1,1 @@
+export MY_SQL_USER=spinaashton MY_SQL_PASS=test

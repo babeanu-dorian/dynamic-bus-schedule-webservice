@@ -11,8 +11,25 @@ notifications:
     on_success: never
     on_failure: never
 
+services:
+  - mysql
+
+env:
+  -MY_SQL_USER=test
+  -MY_SQL_PASS=test
+
+before_install:
+  - echo -e "USE mysql;\nUPDATE user SET password=PASSWORD('test') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - cd Databases
+  - echo -e "DynamicBusSchedulingServer\ntest\ntest\ntest\n" | bash makeDB.sh
+  - mysql -utest -ptest < ./DB_Mock_Contents/map1.sql
+
 before_script:
   - sleep 5
 
 script:
+  - npm install
   - npm test
+
+after_success: 
+  - npm run coverage
