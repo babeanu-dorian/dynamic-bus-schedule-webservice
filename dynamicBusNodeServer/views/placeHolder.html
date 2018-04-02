@@ -102,6 +102,8 @@
 											// to be down; reset to false upon successfully reaching a server
 
 		var requestData;
+		var selectedRoute;
+		var selectedStation;
 
 		function handleError(err, callback) {
 			// TODO check if the error is a connection failure before running the code below
@@ -202,13 +204,18 @@
 		    $scope.getRouteData = function(){
 		    	$scope.schedule = [];
 		    	requestData = { 'time':$scope.selectedTime };
+		    	console.log($scope);
+		    	selectedStation = null;
+		    	selectedRoute = null;
 		    	if ($scope.selectedStation) {
 		    		requestData.station = $scope.selectedStation.id;
+		    		selectedStation = $scope.selectedStation;
 		    	}
-		    	if (typeof $scope.selectedRoute !== 'undefined') {
+		    	if ($scope.selectedRoute != null) {
+		    		selectedRoute = $scope.selectedRoute;
 		    		requestData.route = $scope.selectedRoute;
 		    		makeRouteDataRequest($scope, $http, requestData);
-		    	} else if (typeof $scope.selectedStation !== 'undefined') {
+		    	} else if ($scope.selectedStation != null) {
 		    		// if the route is not specified, make a request for each route containing the station
 		    		for (var i = 0; i != $scope.selectedStation.routes.length; ++i) {
 		    			requestData.route = $scope.selectedStation.routes[i];
@@ -220,10 +227,12 @@
 		    	}
 		    }
 
+		    //Converts station ID to real station name
 		    $scope.findStation = function(id) {
     			return $scope.stationRoutes.find(x => x.id === id).name;
   			}
 
+  			//Ensures only stations on the selected route are displayed on the dropdown menu
   			$scope.getStationsOfRoute = function() {
   				var stationsOfRoute = [];
   				if($scope.selectedRoute == null) {
@@ -239,10 +248,15 @@
   				return stationsOfRoute;
   			}
 
+  			//Calculates real time bus will arrive and displays it in 24hr format
   			$scope.covertToCurrTime = function(time) {
   				var date = new Date();
   				date.setSeconds(date.getSeconds() + time);
-  				return date.getHours() + ':' + date.getMinutes();
+  				var minutes = date.getMinutes();
+  				if(minutes < 10) {
+  					minutes = '0' + minutes;
+  				}
+  				return date.getHours() + ':' + minutes;
   			}
 
 		    $scope.stationRoutes = [];
@@ -252,10 +266,19 @@
 		    var reloadPage = function() {
 				if(requestData) {
 					$scope.schedule = [];
-					makeRouteDataRequest($scope, $http, requestData);
+					//If only a station is selected makes sure full information is displayed on refresh
+					//In any other case just doing the previous request is adequate
+					if(selectedRoute == null && selectedStation != null) {
+						for (var i = 0; i != $scope.selectedStation.routes.length; ++i) {
+		    				requestData.route = $scope.selectedStation.routes[i];
+		    				makeRouteDataRequest($scope, $http, requestData);
+		    			}
+					} else {
+						makeRouteDataRequest($scope, $http, requestData);
+					}
 				}
 			}
-			console.log($scope);
+			//Refreshes page to make sure information displayed is upto date, 10 seconds for testing purposes
 		    $interval(reloadPage, 10000);	
 		});
 	</script>
