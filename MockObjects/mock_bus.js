@@ -1,23 +1,23 @@
 var request = require('request');
 
-module.exports = function(id, route, key, serverList, speed) {
+module.exports = function(id, route, key, url, speed) {
 
 	return {
 		id:id,
 		route:route,
 		key:key,
-		serverList:serverList,
-		routeServer:serverList[0],
+		routeServer:url,
 		speed:speed,
 		progress:0.0,
 		interval:undefined,
 		sendData: function() {
 			this.progress += this.speed;
-			if (this.progress > 1.0)
+			if (this.progress >= 1.0)
 				this.progress -= 1.0;
 			request.post(
 				{
-					url:this.routeServer + "/routeData",
+					headers: {'content-type' : 'application/json'},
+					url:this.routeServer + "busdata",
 					body:JSON.stringify({
 						id:this.id,
 						key:this.key,
@@ -26,13 +26,21 @@ module.exports = function(id, route, key, serverList, speed) {
 					})
 				},
 				function(error, response, body){
+					
 					if (error) {
 						console.log(error); // TODO: select another server from serverList in case of error
-					} else if (body.serverOfRoute !== this.routeServer) {
-						// the server was not the one handling route,
-						// update server address and send the data there
-						this.routeServer = body.serverOfRoute;
-						this.sendData();
+					} else {
+						body = JSON.parse(body);
+						if (body.serverOfRoute != this.routeServer) {
+							// the server was not the one handling route,
+							// update server address and send the data there
+							this.progress -= this.speed;
+							if(this.progress < 0.0) {
+								this.progress += 1.0;
+							}
+							this.routeServer = body.serverOfRoute;
+							this.sendData();
+						}
 					}
 				}.bind(this)
 			);

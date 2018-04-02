@@ -10,7 +10,7 @@ router.post('/', function(req, res, next) {
 
     // TODO: puth these requests in a queue and do this processing in order
 
-	console.log(req.body);
+	//console.log(req.body);
 
     let busId = parseInt(req.body.id);
     let key = req.body.key;
