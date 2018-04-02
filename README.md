@@ -40,11 +40,11 @@ mqsql -u<2> -p<3> < ./Databases/DB_Mock_Contents/map2.sql
 map2.sql has more data than map1.sql, however map1.sql MUST be loaded if you want to run your tests locally.
 
 ### Node Servers : To start server after cloning
-Ensure the environment variables MY_SQL_USER and MY_SQL_PASS are set. They must match the onces you used when creating the database (2 and 3 on the list above). You can set them with:
+Ensure the environment variables MY_SQL_USER and MY_SQL_PASS are set. They must match the ones you used when creating the database (2 and 3 on the list above). You can set them with:
 
 export MY_SQL_USER=<2>
 
-export MY_SQL_PAS=<3>
+export MY_SQL_PASS=<3>
 
 sudo npm install
 
