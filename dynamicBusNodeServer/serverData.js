@@ -150,7 +150,7 @@ module.exports = {
 
 		this.address = ip.address();
 		this.httpPort = port;
-		this.fullHttpAddress = httpAddres(this.address, this.httpPort);
+		this.fullHttpAddress = httpAddress(this.address, this.httpPort);
 		/* It is possible to set an environment port for testing purposes.  
 		If it is set the socket port will be env.Port + 1000, 
 		otherwise both httpPort and socketPort will be chosen as the

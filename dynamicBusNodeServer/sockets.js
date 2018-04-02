@@ -105,6 +105,8 @@ function handleConnectionClose(socket, serverData){
     		break;
     	}
     }
+    console.log("New Load Distribution");
+    console.log(serverData.mapRouteServer);
 }
 /**
  * For an action on a socket, checks if the socket has already been added to the socketMap
