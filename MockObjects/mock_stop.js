@@ -19,6 +19,7 @@ module.exports = function(id, routeList, url) {
 			});
 		},
 		update: function() {
+			this.schedule = [];
 			for(var i = 0 ; i < routeList.length ; i++) {
 				request.post(
 					{

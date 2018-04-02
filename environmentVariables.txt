@@ -1,1 +1,1 @@
-export MY_SQL_USER=spinaashton MY_SQL_PASS=test
+export MY_SQL_USER=<YOUR_USER> MY_SQL_PASS=<YOUR_PASS> PORT=<YOUR_CHOICE || ''
